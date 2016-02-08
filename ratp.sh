@@ -13,4 +13,4 @@ function ratp_url_metro {
 # requete traffic
 traffic=$(xquery_html -q:query_ratp_traffic -s:"http://www.ratp.fr/meteo/")
 # traffic metro 7
-xquery -qs:"//ligne[@id='ligne_metro_7']" -s:- <<< $traffic
+xquery -qs:"//ligne[@id='ligne_metro_7']" -s:- <<< "$traffic"

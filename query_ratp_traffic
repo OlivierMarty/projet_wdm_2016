@@ -5,7 +5,7 @@
     return <ligne id="{ $ligne/@id }">
         <img src="http://ratp.fr{ $img/@src }" alt="{ $img/@alt }"/>
         <message>
-        { $ligne//span[@class="perturb_message"] }
+        { $ligne//*:span[@class="perturb_message"]/text() }
         </message>
       </ligne>
 }
