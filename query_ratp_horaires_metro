@@ -1,13 +1,13 @@
 <result>
-<images>
-{
-  for $img in //*:div[@class="line_details"]/*:img
-    return <img src="http://ratp.fr{ $img/@src }" alt="{ $img/@alt }"/>
-}
-</images>
-<horaires>
-{
-  //*:div[@id="prochains_passages"]//*:table
-}
-</horaires>
+  <images>
+  {
+    for $img in //*:div[@class="line_details"]/*:img
+      return <img src="http://ratp.fr{ $img/@src }" alt="{ $img/@alt }"/>
+  }
+  </images>
+  <horaires>
+  {
+    //*:div[@id="prochains_passages"]//*:table
+  }
+  </horaires>
 </result>

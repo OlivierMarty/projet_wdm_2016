@@ -1,0 +1,12 @@
+<result>
+{
+  for $ligne in //*:div[@class="encadre_ligne"]
+    let $img := $ligne/*:img[1]
+    return <ligne id="{ $ligne/@id }">
+        <img src="http://ratp.fr{ $img/@src }" alt="{ $img/@alt }"/>
+        <message>
+        { $ligne//span[@class="perturb_message"] }
+        </message>
+      </ligne>
+}
+</result>
