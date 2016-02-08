@@ -1,11 +1,15 @@
 #!/bin/bash
 
 # NOTIFICATIONS
-notification_methode="free"
+notification_methode="sendmail" # ou "free"
 
-# free sms api http://mobile.free.fr/
-notification_free_user=""
-notification_free_pass=""
+# méthode "free" (sms api voir http://mobile.free.fr/ )
+notification_free_user="12345678"
+notification_free_pass="wwwwwwwwwww"
+
+# méthode "sendmail"
+notification_sendmail_to="example@example.com"
+notification_sendmail_object="Notification traffic"
 
 # xquery processor
 function xquery {
