@@ -8,4 +8,4 @@ function ratp_url_metro {
 }
 
 # requete
-$xquery_html -q:query_metro -s:"$(ratp_url_metro "republique" 5 A)"
+$xquery_html -q:query_ratp_horaires_metro -s:"$(ratp_url_metro "republique" 5 A)"
