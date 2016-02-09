@@ -1,21 +1,33 @@
-<result>
+<results>
 {
   for $ligne in //*:div[@class="encadre_ligne"]
     let $img := $ligne/*:img[1]
-    return <ligne id="{ $ligne/@id }">
-        <normal>
+    let $a := $ligne//*:span[@class="perturb_link"]/*:a[1]
+    return <result>
+        <script>ratp_traffic</script>
+        <id>ratp_traffic_{ data($ligne/@id) }</id>
+        <status>
         {
           if ($img/@alt = "normal")
-          then "true"
-          else "false"
+          then "ok"
+          else "problem"
         }
-        </normal>
-        <img src="http://ratp.fr{ $img/@src }" alt="{ $img/@alt }"/>
+        </status>
+        <images>
+          <img src="http://ratp.fr{ $img/@src }" alt="{ $img/@alt }"/>
+        </images>
         <message>
         {
           $ligne//*:span[@class="perturb_message"]/text()
         }
         </message>
-      </ligne>
+        <links>
+        {
+          if ($a/@href="")
+          then ""
+          else <a href="{ $a/@href }">{ $a/text() }</a>
+        }
+        </links>
+      </result>
 }
-</result>
+</results>
