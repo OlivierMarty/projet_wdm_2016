@@ -3,11 +3,32 @@
 source ./conf.sh
 source ./notification.sh
 
-traffic=$(xquery_html -q:query_ratp_traffic -s:"http://www.ratp.fr/meteo/")
-traffic_ligne_7=$(xquery -qs:"/results/result[id/text()='ratp_traffic_ligne_metro_7']" -s:- <<< "$traffic")
-statut=$(xquery -qs:"/result/status/text()" -s:- \!omit-xml-declaration=yes <<< "$traffic_ligne_7")
-if [ "$statut" = "problem" ]
-then
-  message=$(xquery -qs:"/result/message/text()" -s:- \!omit-xml-declaration=yes <<< "$traffic_ligne_7")
-  notify "Problème sur la ligne 7 : $message"
-fi
+# combine plusieurs xml de racine results sous la même racine
+# usage : combine string1 string2 ...
+function combine {
+  echo '<?xml version="1.0" encoding="UTF-8"?>'
+  echo '<results>'
+  for xml in "$@"
+  do
+    xquery -qs:"/results/*" -s:- \!omit-xml-declaration=yes <<< "$xml"
+  done
+  echo '</results>'
+}
+
+# telecharge et combine les données
+
+results_ratp_traffic=$(./ratp_traffic.sh)
+results_velib=$(./velib.sh)
+results=$(combine "$results_ratp_traffic" "$results_velib")
+
+# pour chaque evenement, envoie une notification s'il y a un problème
+for id in $events_ids
+do
+  result=$(xquery -qs:"/results/result[id/text()='$id']" -s:- <<< "$results")
+  statut=$(xquery -qs:"/result/status/text()" -s:- \!omit-xml-declaration=yes <<< "$result")
+  if [ "$statut" = "problem" ]
+  then
+    message=$(xquery -qs:"/result/message/text()" -s:- \!omit-xml-declaration=yes <<< "$result")
+    notify "$message"
+  fi
+done

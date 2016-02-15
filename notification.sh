@@ -4,7 +4,7 @@ source ./conf.sh
 
 # usage : notify "message"
 function notify {
-  case "$notification_methode" in
+  case "$notification_method" in
     free)
       curl "https://smsapi.free-mobile.fr/sendmsg"\
         --get\
@@ -15,8 +15,11 @@ function notify {
     sendmail)
       mail -s "$notification_sendmail_object" "$notification_sendmail_to" <<< "$@"
       ;;
+    print)
+      echo "$@"
+      ;;
     *)
-      echo "\$notification_methode=$notification_methode non reconnu !" >&2
+      echo "\$notification_method=$notification_method non reconnu !" >&2
       exit 1
   esac
 }
