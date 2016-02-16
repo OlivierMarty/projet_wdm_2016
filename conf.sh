@@ -2,7 +2,7 @@
 
 # EVENEMENTS A SURVEILLER
 
-events_ids="ratp_traffic_ligne_metro_7 velib_42703"
+events_ids="ratp_traffic_ligne_metro_7 jcdecaux_vls_42703"
 
 
 # NOTIFICATIONS
@@ -19,6 +19,9 @@ notification_sendmail_object="Notification traffic"
 
 
 # CONFIGURATION AVANCEE
+
+# api keys
+api_key_jcdecaux=
 
 # xquery processor
 function xquery {
