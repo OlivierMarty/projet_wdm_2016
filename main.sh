@@ -20,11 +20,11 @@ function combine {
 echo "Download ratp_traffic..." >&2
 results_ratp_traffic=$(./ratp_traffic.sh)
 
-echo "Download velib..." >&2
-results_velib=$(./velib.sh)
+echo "Download jcdecaux_vls..." >&2
+results_jcdecaux_vls=$(./jcdecaux_vls.sh)
 
 echo "Combine results..." >&2
-results=$(combine "$results_ratp_traffic" "$results_velib")
+results=$(combine "$results_ratp_traffic" "$results_jcdecaux_vls")
 
 # pour chaque evenement, envoie une notification s'il y a un problème
 for id in $events_ids

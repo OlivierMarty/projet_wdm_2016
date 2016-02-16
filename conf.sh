@@ -30,5 +30,5 @@ function xquery_html {
 
 # json to xml
 function json2xml {
-  ./xml2json.py -t json2xml
+  ./json2xml_wrapper.py
 }
