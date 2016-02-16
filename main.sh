@@ -17,13 +17,19 @@ function combine {
 
 # telecharge et combine les données
 
+echo "Download ratp_traffic..." >&2
 results_ratp_traffic=$(./ratp_traffic.sh)
+
+echo "Download velib..." >&2
 results_velib=$(./velib.sh)
+
+echo "Combine results..." >&2
 results=$(combine "$results_ratp_traffic" "$results_velib")
 
 # pour chaque evenement, envoie une notification s'il y a un problème
 for id in $events_ids
 do
+  echo "Search result for $id..." >&2
   result=$(xquery -qs:"/results/result[id/text()='$id']" -s:- <<< "$results")
   statut=$(xquery -qs:"/result/status/text()" -s:- \!omit-xml-declaration=yes <<< "$result")
   if [ "$statut" = "problem" ]
