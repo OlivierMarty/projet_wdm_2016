@@ -1,6 +1,7 @@
 (: il y a aussi l'API JCDecaux pour tous leur services de
 vélos, mais il faut créer un compte et tout pour avoir une
 clef... :)
+(: TODO bug de fuseau horaire :)
 <results>
   {
     for $res in /*:json/*:records/*:fields
@@ -9,11 +10,11 @@ clef... :)
           <script>velib</script>
           <id>velib_{ $res/*:number/text() }</id>
           {
-            if ($places > 2)
+            if ($places > 4)
             then <status>ok</status>
             else (
                 <status>problem</status>,
-                <message>Station velib { lower-case($res/*:name/text()) } : plus que { $places } places disponibles !</message>
+                <message>Station velib { lower-case($res/*:name/text()) } : { format-dateTime($res/*:last_update/text(), "à [H01]h[M01] le [D01]/[M01]", "en", "AD", "fr") } : plus que { $places } places disponibles !</message>
               )
           }
       </result>
