@@ -1,5 +1,5 @@
 import urllib.request
-import xml.etree.cElementTree as ET
+from bs4 import BeautifulSoup
 from subprocess import run, PIPE
 
 class XML:
@@ -7,11 +7,6 @@ class XML:
     """Provide either parameter str= or url=
     Optional parameters : lang=xml,html,json
     """
-
-    # language : xml, html, or json
-    lang = kwargs.get('lang', 'xml')
-    if lang != 'xml':
-      raise NotImplementedError('lang!=xml') # TODO html, json
 
     # fetch data
     if 'str' in kwargs:
@@ -22,7 +17,14 @@ class XML:
       raise ValueError('XML : either str or url must be provided')
 
     # parse data
-    self.data = ET.fromstring(source)
+    lang = kwargs.get('lang', 'xml')
+    if lang == "xml":
+      parser = "lxml-xml"
+    elif lang == "html":
+      parser = "lxml"
+    else:
+      raise NotImplementedError('lang != xml & lang != html') # TODO json
+    self.data = BeautifulSoup(source, parser)
 
   def xquery(self, query):
     """A binding with Saxon (at least for the moment)
@@ -30,12 +32,11 @@ class XML:
     """
     process = run(["java", "-cp", "saxon.jar:tagsoup-1.2.jar",
       "net.sf.saxon.Query", "!omit-xml-declaration=yes", "-qs:" + query, "-s:-"],
-      stdout=PIPE, input=ET.tostring(self.data), check=True)
+      stdout=PIPE, input=str(self.data).encode(), check=True)
     return XML(str=b"<xquery>" + process.stdout + b"</xquery>")
  
   def __str__(self):
-    return ET.tostring(self.data).decode()
-
+    return self.data.prettify()
 
 
 #print(str(XML(str="<a>te<i>sa<i>l</i>ut</i>t</a>").xquery("//*:i")))
