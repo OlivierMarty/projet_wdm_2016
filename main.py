@@ -38,7 +38,6 @@ def ratp_traffic():
   return XML(url="http://www.ratp.fr/meteo/", lang="html").xquery(query)
 
 def jcdecaux_vls():
-  # TODO télécharger seulement les stations dans jcdecaux_vls : le document entier est énorme
   query = """
      (: TODO bug de fuseau horaire :)
      (:~ convert epoch seconds to dateTime :)
@@ -50,7 +49,7 @@ def jcdecaux_vls():
        return format-dateTime($datetime, "à [H01]h[M01] le [D01]/[M01]", "en", "AD", "fr")
      };
      
-     for $res in /*:json/*:item
+     for $res in /*:json (:/*:item:)
        let $places := $res/*:available_bike_stands/text()
        return <result>
            <source>jcdecaux_vls</source>
@@ -66,11 +65,15 @@ def jcdecaux_vls():
          </result>
      """
 
-  return XML(url="https://api.jcdecaux.com/vls/v1/stations?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json").xquery(query)
+  res = []
+  for station in config.events['jcdecaux_vls']:
+    res += XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json").xquery(query)
+  return res
 
 
 results=ratp_traffic() + jcdecaux_vls()
 
 for r in results:
   if r.data.id.string in config.events.get(r.data.source.string, []):
-    notification.notify(r.data.message.string)
+    if r.data.status.string == 'problem':
+      notification.notify(r.data.message.string)
