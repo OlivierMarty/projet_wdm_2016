@@ -1,6 +1,8 @@
 import urllib.request
 from bs4 import BeautifulSoup
 from subprocess import run, PIPE
+import dicttoxml
+import json
 
 class XML:
   def __init__(self, **kwargs):
@@ -21,12 +23,15 @@ class XML:
 
       # parse data
       lang = kwargs.get('lang', 'xml')
-      if lang == "xml":
+      if lang == 'json':
+        source = dicttoxml.dicttoxml(json.loads(source.decode()), attr_type=False, custom_root='json')
+        parser = "lxml-xml"
+      elif lang == "xml":
         parser = "lxml-xml"
       elif lang == "html":
         parser = "lxml"
       else:
-        raise NotImplementedError('lang != xml & lang != html') # TODO json
+        raise NotImplementedError('lang='+lang+" not supported")
       self.data = BeautifulSoup(source, parser)
 
   def xquery(self, query):

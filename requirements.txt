@@ -1,5 +1,4 @@
-json2xml
 BeautifulSoup
-
 # requires packages libxml2-dev libxslt1-dev:
 lxml
+dicttoxml
