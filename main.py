@@ -1,5 +1,6 @@
 from class_xml import XML
 import config
+import notification
 
 def ratp_traffic():
   query = """
@@ -8,7 +9,7 @@ def ratp_traffic():
        let $a := $ligne//*:span[@class="perturb_link"]/*:a[1]
        return <result>
            <source>ratp_traffic</source>
-           <id>ratp_traffic_{ data($ligne/@id) }</id>
+           <id>{ data($ligne/@id) }</id>
            <status>
            {
              if ($img/@alt = "normal")
@@ -37,6 +38,7 @@ def ratp_traffic():
   return XML(url="http://www.ratp.fr/meteo/", lang="html").xquery(query)
 
 def jcdecaux_vls():
+  # TODO télécharger seulement les stations dans jcdecaux_vls : le document entier est énorme
   query = """
      (: TODO bug de fuseau horaire :)
      (:~ convert epoch seconds to dateTime :)
@@ -52,7 +54,7 @@ def jcdecaux_vls():
        let $places := $res/*:available_bike_stands/text()
        return <result>
            <source>jcdecaux_vls</source>
-           <id>jcdecaux_vls_{ $res/*:number/text() }</id>
+           <id>{ $res/*:number/text() }</id>
            {
              if ($places > 4)
              then <status>ok</status>
@@ -66,7 +68,9 @@ def jcdecaux_vls():
 
   return XML(url="https://api.jcdecaux.com/vls/v1/stations?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json").xquery(query)
 
-for x in ratp_traffic():
-  print(str(x))
-for x in jcdecaux_vls():
-  print(str(x))
+
+results=ratp_traffic() + jcdecaux_vls()
+
+for r in results:
+  if r.data.id.string in config.events.get(r.data.source.string, []):
+    notification.notify(r.data.message.string)
