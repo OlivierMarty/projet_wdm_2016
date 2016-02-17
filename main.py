@@ -1,6 +1,7 @@
 from class_xml import XML
 import config
 import notification
+from itertools import chain
 
 def ratp_traffic():
   query = """
@@ -35,7 +36,8 @@ def ratp_traffic():
          </result>
      """
 
-  return XML(url="http://www.ratp.fr/meteo/", lang="html").xquery(query)
+  for r in XML(url="http://www.ratp.fr/meteo/", lang="html").xquery(query):
+    yield r
 
 def jcdecaux_vls():
   query = """
@@ -78,14 +80,13 @@ def jcdecaux_vls():
          </result>)
      """
 
-  res = []
   ids = set(map(lambda s : s.split('_')[0], config.events['jcdecaux_vls']))
   for station in ids:
-    res += XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json").xquery(query)
-  return res
+    for r in XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json").xquery(query):
+      yield r
 
 
-results=ratp_traffic() + jcdecaux_vls()
+results=chain(ratp_traffic(), jcdecaux_vls())
 
 for r in results:
   if r.data.id.string in config.events.get(r.data.source.string, []):
