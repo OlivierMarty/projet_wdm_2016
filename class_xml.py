@@ -9,31 +9,34 @@ class XML:
     """
 
     # fetch data
-    if 'str' in kwargs:
-      source = kwargs['str']
-    elif 'url' in kwargs:
-      source = urllib.request.urlopen(kwargs['url']).read()
+    if 'data' in kwargs:
+      self.data = kwargs['data']
     else:
-      raise ValueError('XML : either str or url must be provided')
+      if 'str' in kwargs:
+        source = kwargs['str']
+      elif 'url' in kwargs:
+        source = urllib.request.urlopen(kwargs['url']).read()
+      else:
+        raise ValueError('XML : either str or url must be provided')
 
-    # parse data
-    lang = kwargs.get('lang', 'xml')
-    if lang == "xml":
-      parser = "lxml-xml"
-    elif lang == "html":
-      parser = "lxml"
-    else:
-      raise NotImplementedError('lang != xml & lang != html') # TODO json
-    self.data = BeautifulSoup(source, parser)
+      # parse data
+      lang = kwargs.get('lang', 'xml')
+      if lang == "xml":
+        parser = "lxml-xml"
+      elif lang == "html":
+        parser = "lxml"
+      else:
+        raise NotImplementedError('lang != xml & lang != html') # TODO json
+      self.data = BeautifulSoup(source, parser)
 
   def xquery(self, query):
     """A binding with Saxon (at least for the moment)
-    returns a XML object containing all results embedded in a <xquery> root
+    returns a list of XML objects
     """
     process = run(["java", "-cp", "saxon.jar:tagsoup-1.2.jar",
       "net.sf.saxon.Query", "!omit-xml-declaration=yes", "-qs:" + query, "-s:-"],
       stdout=PIPE, input=str(self.data).encode(), check=True)
-    return XML(str=b"<xquery>" + process.stdout + b"</xquery>")
+    return [XML(data=obj) for obj in XML(str=b"<xquery>" + process.stdout + b"</xquery>").data.xquery.children]
  
   def __str__(self):
     return self.data.prettify()
