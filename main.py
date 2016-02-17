@@ -51,9 +51,10 @@ def jcdecaux_vls():
      
      for $res in /*:json (:/*:item:)
        let $places := $res/*:available_bike_stands/text()
-       return <result>
+       let $bikes := $res/*:available_bikes/text()
+       return (<result>
            <source>jcdecaux_vls</source>
-           <id>{ $res/*:number/text() }</id>
+           <id>{ $res/*:number/text() }_empty</id>
            {
              if ($places > 4)
              then <status>ok</status>
@@ -62,11 +63,24 @@ def jcdecaux_vls():
                  <message>Station vélo { lower-case($res/*:name/text()) } : { local:millitimestamp-to-date($res/*:last_update/text()) } : plus que { $places } places disponibles !</message>
                )
            }
-         </result>
+         </result>,
+         <result>
+           <source>jcdecaux_vls</source>
+           <id>{ $res/*:number/text() }_full</id>
+           {
+             if ($bikes > 4)
+             then <status>ok</status>
+             else (
+                 <status>problem</status>,
+                 <message>Station vélo { lower-case($res/*:name/text()) } : { local:millitimestamp-to-date($res/*:last_update/text()) } : plus que { $bikes } vélos disponibles !</message>
+               )
+           }
+         </result>)
      """
 
   res = []
-  for station in config.events['jcdecaux_vls']:
+  ids = set(map(lambda s : s.split('_')[0], config.events['jcdecaux_vls']))
+  for station in ids:
     res += XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json").xquery(query)
   return res
 
