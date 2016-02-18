@@ -9,7 +9,7 @@ api_key = {
 
 events = {
   'ratp_traffic' : ['ligne_metro_7'],
-  'jcdecaux_vls' : ['42707_full', '42707_empty']
+  'jcdecaux_vls' : ['42707_full', '42707_empty', '42703_empty', '19001_full', '8038_empty']
 }
 
 # NOTIFICATIONS

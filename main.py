@@ -26,27 +26,36 @@ def ratp_traffic():
 
 
 class Event_jcdecaux_vls_full(Event):
-  def __init__(self, ident, nom, timestamp, places):
+  def __init__(self, ident, nom, timestamp, places, status):
     self.source = 'jcdecaux_vls'
     self.id = ident + "_full"
     self.places = int(places)
+    self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
     date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
-    self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : plus que ' + places + ' places disponibles !'
+    if(status != "OPEN"):
+      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : fermée !'
+    else:
+      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : plus que ' + places + ' places disponibles !'
 
   def problem(self):
-    return self.places <= 4 # TODO config
+    return self.status != "OPEN" or self.places <= 4 # TODO config
 
 
 class Event_jcdecaux_vls_empty(Event):
-  def __init__(self, ident, nom, timestamp, bikes):
+  def __init__(self, ident, nom, timestamp, bikes, status):
     self.source = 'jcdecaux_vls'
     self.id = ident + "_empty"
     self.bikes = int(bikes)
+    self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
+    print(ident)
     date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
-    self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : plus que ' + bikes + ' vélos !'
+    if(status != "OPEN"):
+      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : fermée !'
+    else:
+      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : plus que ' + bikes + ' vélos !'
 
   def problem(self):
-    return self.bikes <= 4 # TODO config
+    return self.status != "OPEN" or self.bikes <= 4 # TODO config
 
 
 def jcdecaux_vls():
@@ -54,8 +63,8 @@ def jcdecaux_vls():
   for station in ids:
     xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json")
     tag = xml.data.json
-    yield Event_jcdecaux_vls_full(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string)
-    yield Event_jcdecaux_vls_empty(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bikes.string)
+    yield Event_jcdecaux_vls_full(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
+    yield Event_jcdecaux_vls_empty(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
 
 events=chain(ratp_traffic(), jcdecaux_vls())
