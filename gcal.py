@@ -89,10 +89,11 @@ def main():
         print('  Updatedtime:', event['updated'])
         
         #summary:   the description of the event
-        print('  Description:', event['description'])
+        if ('description' in event):
+            print('  Description:', event['description'])
         
-
-        print('  Location:', event['location'])
+        if ('location' in event):
+            print('  Location:', event['location'])
 
         print("  Organizer's name:", event['organizer']['displayName'])
         print("  Organizer's email:", event['organizer']['email'])
