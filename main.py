@@ -66,7 +66,35 @@ def jcdecaux_vls():
     yield Event_jcdecaux_vls_empty(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
 
-events=chain(ratp_traffic(), jcdecaux_vls())
+class Event_transilien(Event):
+  def __init__(self, ident, message):
+    self.source = 'transilien'
+    self.id = ident
+    self.message = message
+
+  def problem(self):
+    return self.message != 'Trafic normal'
+
+
+def transilien():
+  xml = XML(url="http://www.transilien.com/info-trafic/temps-reel", lang="html").data
+  container = xml.select('div.b_info_trafic')[0]
+  for line in container.find_all('div', recursive=False):
+    id = line.select('.picto-transport')[1].get_text()
+    message = ""
+    for c in line.select_one('.title').children:
+      if c.name: # a tag
+        if 'picto-transport' not in c.attrs.get('class', ''):
+          message += c.get_text()
+      else: # a string
+        message += c
+    for det in line.select('.trafic'): # I think 0 or 1 elements
+      message += det.get_text()
+    message = " ".join(message.split()) # delete multiple spaces
+    yield Event_transilien(id, message)
+
+
+events=chain(ratp_traffic(), transilien(), jcdecaux_vls())
 
 for event in events:
   if event.id in config.events.get(event.source, []):
