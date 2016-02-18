@@ -2,6 +2,8 @@ from class_xml import XML
 import config
 import datetime
 
+# SOURCE CLASSES
+
 class Source:
   def __init__(self):
     pass
@@ -16,11 +18,6 @@ class Source_ratp(Source):
 
   def problem(self):
     return self.status != 'normal'
-
-
-def ratp_trafic():
-  for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
-    yield Source_ratp(tag['id'], tag.img['alt'], tag.select('span.perturb_message')[0].string)
 
 
 class Source_jcdecaux_vls_full(Source):
@@ -55,15 +52,6 @@ class Source_jcdecaux_vls_empty(Source):
     return self.status != "OPEN" or self.bikes <= 4 # TODO config
 
 
-def jcdecaux_vls():
-  ids = set(map(lambda s : s.split('_')[0], config.sources['jcdecaux_vls']))
-  for station in ids:
-    xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json")
-    tag = xml.data.json
-    yield Source_jcdecaux_vls_full(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
-    yield Source_jcdecaux_vls_empty(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
-
-
 class Source_transilien(Source):
   def __init__(self, ident, message):
     self.source = 'transilien'
@@ -72,6 +60,23 @@ class Source_transilien(Source):
 
   def problem(self):
     return self.message != 'Trafic normal'
+
+
+# SOURCES GENERATORS
+
+
+def ratp_trafic():
+  for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
+    yield Source_ratp(tag['id'], tag.img['alt'], tag.select('span.perturb_message')[0].string)
+
+
+def jcdecaux_vls():
+  ids = set(map(lambda s : s.split('_')[0], config.sources['jcdecaux_vls']))
+  for station in ids:
+    xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json")
+    tag = xml.data.json
+    yield Source_jcdecaux_vls_full(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
+    yield Source_jcdecaux_vls_empty(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
 
 def transilien():
