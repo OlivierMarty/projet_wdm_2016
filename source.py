@@ -86,7 +86,7 @@ def transilien():
           message += c.get_text()
       else: # a string
         message += c
-    for det in line.select('.trafic'): # I think 0 or 1 elements
+    for det in line.select('.item-disruption'): # I think 0 or 1 elements
       message += det.get_text()
     message = " ".join(message.split()) # delete multiple spaces
     yield Source_transilien(id, message)
