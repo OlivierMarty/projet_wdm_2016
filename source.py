@@ -39,7 +39,13 @@ class Source_jcdecaux_vls_full(Source_jcdecaux_vls):
     self.id += "_full"
     self.places = int(places)
     if not self.message:
-      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : plus que ' + places + ' places disponibles !'
+      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : '
+      if self.places == 0:
+        self.message += 'plus de place !'
+      elif self.places == 1:
+        self.message += 'plus qu\'une place !'
+      else:
+        self.message += 'plus que ' + places + ' places disponibles !'
 
   def problem(self):
     return super(Source_jcdecaux_vls_full, self).problem() or self.places <= 4 # TODO config
@@ -51,7 +57,13 @@ class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
     self.id += "_empty"
     self.bikes = int(bikes)
     if not self.message:
-      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : plus que ' + bikes + ' vélos !'
+      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : '
+      if self.bikes == 0:
+        self.message += 'plus de vélo !'
+      elif self.bikes == 1:
+        self.message += 'plus qu\'un vélo !'
+      else:
+        self.message += 'plus que ' + bikes + ' vélos !'
 
   def problem(self):
     return super(Source_jcdecaux_vls_empty, self).problem() or self.bikes <= 4 # TODO config
