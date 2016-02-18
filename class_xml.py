@@ -6,7 +6,10 @@ import json
 
 class XML:
   def __init__(self, **kwargs):
-    """Provide either parameter str= or url=
+    """Provide one of the following parameters
+      str=<a>...</a>
+      url=http:// or file://
+      data=BeautifulSoup object
     Optional parameters : lang=xml,html,json
     """
 
@@ -19,7 +22,7 @@ class XML:
       elif 'url' in kwargs:
         source = urllib.request.urlopen(kwargs['url']).read()
       else:
-        raise ValueError('XML : either str or url must be provided')
+        raise ValueError('XML : either str, url, or data must be provided')
 
       # parse data
       lang = kwargs.get('lang', 'xml')
@@ -45,7 +48,4 @@ class XML:
  
   def __str__(self):
     return self.data.prettify()
-
-
-#print(str(XML(str="<a>te<i>sa<i>l</i>ut</i>t</a>").xquery("//*:i")))
 
