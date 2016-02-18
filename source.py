@@ -19,37 +19,42 @@ class Source_ratp(Source):
   def problem(self):
     return self.status != 'normal'
 
+class Source_jcdecaux_vls(Source):
+  def __init__(self, ident, nom, timestamp, status):
+    self.source = 'jcdecaux_vls'
+    self.id = ident
+    self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
+    self.date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
+    if status != "OPEN":
+      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : fermée !'
+    else:
+      self.message = None
 
-class Source_jcdecaux_vls_full(Source):
+  def problem(self):
+    return self.status != "OPEN"
+
+class Source_jcdecaux_vls_full(Source_jcdecaux_vls):
   def __init__(self, ident, nom, timestamp, places, status):
-    self.source = 'jcdecaux_vls'
-    self.id = ident + "_full"
+    super(Source_jcdecaux_vls_full, self).__init__(ident, nom, timestamp, status)
+    self.id += "_full"
     self.places = int(places)
-    self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
-    date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
-    if(status != "OPEN"):
-      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : fermée !'
-    else:
-      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : plus que ' + places + ' places disponibles !'
+    if not self.message:
+      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : plus que ' + places + ' places disponibles !'
 
   def problem(self):
-    return self.status != "OPEN" or self.places <= 4 # TODO config
+    return super(Source_jcdecaux_vls_full, self).problem() or self.places <= 4 # TODO config
 
 
-class Source_jcdecaux_vls_empty(Source):
+class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
   def __init__(self, ident, nom, timestamp, bikes, status):
-    self.source = 'jcdecaux_vls'
-    self.id = ident + "_empty"
+    super(Source_jcdecaux_vls_empty, self).__init__(ident, nom, timestamp, status)
+    self.id += "_empty"
     self.bikes = int(bikes)
-    self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
-    date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
-    if(status != "OPEN"):
-      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : fermée !'
-    else:
-      self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : plus que ' + bikes + ' vélos !'
+    if not self.message:
+      self.message = 'Station vélo ' + nom.lower() + ' ' + self.date + ' : plus que ' + bikes + ' vélos !'
 
   def problem(self):
-    return self.status != "OPEN" or self.bikes <= 4 # TODO config
+    return super(Source_jcdecaux_vls_empty, self).problem() or self.bikes <= 4 # TODO config
 
 
 class Source_transilien(Source):
@@ -63,7 +68,6 @@ class Source_transilien(Source):
 
 
 # SOURCES GENERATORS
-
 
 def ratp_trafic():
   for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
@@ -91,7 +95,7 @@ def transilien():
           message += c.get_text()
       else: # a string
         message += c
-    for det in line.select('.item-disruption'): # I think 0 or 1 elements
+    for det in line.select('.item-disruption'):
       message += det.get_text()
     message = " ".join(message.split()) # delete multiple spaces
     yield Source_transilien(id, message)
