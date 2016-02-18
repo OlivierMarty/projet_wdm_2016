@@ -47,7 +47,6 @@ class Event_jcdecaux_vls_empty(Event):
     self.id = ident + "_empty"
     self.bikes = int(bikes)
     self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
-    print(ident)
     date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
     if(status != "OPEN"):
       self.message = 'Station vélo ' + nom.lower() + ' ' + date + ' : fermée !'
