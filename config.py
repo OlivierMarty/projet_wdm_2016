@@ -8,7 +8,7 @@ api_key = {
 # EVENEMENTS A SURVEILLER
 
 events = {
-  'ratp_traffic' : ['ligne_rer_B', 'ligne_metro_7'],
+  'ratp_trafic' : ['ligne_rer_B', 'ligne_metro_7'],
   'transilien' : ['RER-B', 'RER-C', 'Train-U'],
   'jcdecaux_vls' : ['42707_full', '42707_empty', '42703_empty', '19001_full', '8038_empty']
 }
@@ -23,6 +23,6 @@ notification = {
   },
   'sendmail' : { # méthode "sendmail"
     'to' : 'example@example.com',
-    'object' : 'Notification traffic'
+    'object' : 'Notification trafic'
   }
 }

@@ -11,7 +11,7 @@ class Event:
 
 class Event_ratp(Event):
   def __init__(self, ident, status, message):
-    self.source = 'ratp_traffic'
+    self.source = 'ratp_trafic'
     self.id = ident
     self.status = status
     self.message = message
@@ -20,7 +20,7 @@ class Event_ratp(Event):
     return self.status != 'normal'
 
 
-def ratp_traffic():
+def ratp_trafic():
   for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
     yield Event_ratp(tag['id'], tag.img['alt'], tag.select('span.perturb_message')[0].string)
 
@@ -94,7 +94,7 @@ def transilien():
     yield Event_transilien(id, message)
 
 
-events=chain(ratp_traffic(), transilien(), jcdecaux_vls())
+events=chain(ratp_trafic(), transilien(), jcdecaux_vls())
 
 for event in events:
   if event.id in config.events.get(event.source, []):
