@@ -95,7 +95,7 @@ def main():
         if ('location' in event):
             print('  Location:', event['location'])
 
-        print("  Organizer's name:", event['organizer']['displayName'])
+        print("  Organizer's name:", event['organizer'].get('displayName', 'unknown'))
         print("  Organizer's email:", event['organizer']['email'])
 
         print("  Start time:", event['start']['dateTime'])
