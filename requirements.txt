@@ -1,4 +1,7 @@
-BeautifulSoup
+beautifulsoup4
 # requires packages libxml2-dev libxslt1-dev:
 lxml
 dicttoxml
+# gcal :
+httplib2
+google-api-python-client
