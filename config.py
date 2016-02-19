@@ -16,7 +16,7 @@ sources = {
 # NOTIFICATIONS
 
 notification = {
-  'method' : 'print', # ou "free" ou "sendmail"
+  'methods' : ['print'], # "free", "sendmail"
   'free' : { # méthode "free" (sms api voir http://mobile.free.fr/ )
     'user' : '123456789',
     'pass' : 'wwwwwwwww'
