@@ -10,7 +10,7 @@ api_key = {
 sources = {
   'ratp_trafic' : ['ligne_rer_B', 'ligne_metro_7'],
   'transilien' : ['RER-B', 'RER-C', 'Train-U'],
-  'jcdecaux_vls' : ['42707_full', '42707_empty', '42703_empty', '19001_full', '8038_empty']
+  'jcdecaux_vls' : ['paris_42707_full', 'paris_42707_empty', 'paris_42703_empty', 'paris_19001_full', 'paris_8038_empty', 'nantes_62_full']
 }
 
 # NOTIFICATIONS

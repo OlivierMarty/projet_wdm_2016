@@ -87,12 +87,13 @@ def ratp_trafic():
 
 
 def jcdecaux_vls():
-  ids = set(map(lambda s : s.split('_')[0], config.sources['jcdecaux_vls']))
+  ids = set(map(lambda s : s.rsplit('_', 1)[0], config.sources['jcdecaux_vls']))
   for station in ids:
-    xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + station + "?contract=paris&apiKey="+config.api_key['jcdecaux'], lang="json")
+    (contract, number) = list(station.split('_'))
+    xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + number + "?contract=" + contract + "&apiKey="+config.api_key['jcdecaux'], lang="json")
     tag = xml.data.json
-    yield Source_jcdecaux_vls_full(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
-    yield Source_jcdecaux_vls_empty(tag.number.string, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
+    yield Source_jcdecaux_vls_full(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
+    yield Source_jcdecaux_vls_empty(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
 
 def transilien():
