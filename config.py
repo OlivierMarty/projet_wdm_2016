@@ -1,7 +1,7 @@
 
 
 api_key = {
-  'jcdecaux' : ''
+  'jcdecaux_vls' : ''
 }
 
 

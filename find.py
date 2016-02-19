@@ -19,7 +19,7 @@ def find_id():
 
   elif t == 3: # jcdecaux_vls
     print('Téléchargment de la liste des villes...')
-    xml_contracts = XML(url='https://api.jcdecaux.com/vls/v1/contracts?apiKey=' + config.api_key['jcdecaux'], lang='json')
+    xml_contracts = XML(url='https://api.jcdecaux.com/vls/v1/contracts?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
     contracts = {tag.find('name').string : tag.commercial_name.string for tag in xml_contracts.data.json.children}
     while True:
       print('Choisissez une ville :')
@@ -35,9 +35,9 @@ def find_id():
       print("Ville inconnue !\n\n")
     print('Téléchargement de la liste des stations...')
     if contract:
-      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?contract=' + contract + '&apiKey=' + config.api_key['jcdecaux'], lang='json')
+      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?contract=' + contract + '&apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
     else:
-      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux'], lang='json')
+      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
     dic = {}
     for sta in xml.data.json.find_all("item", recursive=False):
       dic[sta.contract_name.string.lower() + '_' + sta.number.string] =\
