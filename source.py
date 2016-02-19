@@ -48,7 +48,7 @@ class Source_jcdecaux_vls_full(Source_jcdecaux_vls):
         self.message += 'plus que ' + places + ' places disponibles !'
 
   def problem(self):
-    return super(Source_jcdecaux_vls_full, self).problem() or self.places <= 4 # TODO config
+    return super(Source_jcdecaux_vls_full, self).problem() or self.places <= config.sources_params['jcdecaux_vls']['limit_full']
 
 
 class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
@@ -66,7 +66,7 @@ class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
         self.message += 'plus que ' + bikes + ' vélos !'
 
   def problem(self):
-    return super(Source_jcdecaux_vls_empty, self).problem() or self.bikes <= 4 # TODO config
+    return super(Source_jcdecaux_vls_empty, self).problem() or self.bikes <= config.sources_params['jcdecaux_vls']['limit_empty']
 
 
 class Source_transilien(Source):

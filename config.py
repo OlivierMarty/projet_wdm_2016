@@ -13,6 +13,13 @@ sources = {
   'jcdecaux_vls' : ['paris_42707_full', 'paris_42707_empty', 'paris_42703_empty', 'paris_19001_full', 'paris_8038_empty', 'nantes_62_full']
 }
 
+sources_params = {
+  'jcdecaux_vls' : {
+    'limit_full' : 4, # en dessous de cette limite, une notificaation est envoyée
+    'limit_empty': 4  # idem
+  }
+}
+
 # NOTIFICATIONS
 
 notification = {
