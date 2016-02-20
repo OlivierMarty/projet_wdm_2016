@@ -20,7 +20,7 @@ except ImportError:
 # at ~/.credentials/calendar-python-quickstart.json
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = 'Google Calendar API Python Quickstart'
+APPLICATION_NAME = 'Google Calendar API Python'
 
 
 def get_credentials():
@@ -93,6 +93,8 @@ def find_list_event_gcal(events):
         location = ""
         if ('location' in event):
             location = event['location']
+            if (type(location) == 'bytes'):
+                location = location.decode()
             #print('  Location:', event['location'])
 
         #print("  Organizer's name:", event['organizer'].get('displayName', 'unknown'))
@@ -105,7 +107,7 @@ def find_list_event_gcal(events):
         #print(start, event['summary']);
 
 
-        list_event.append(Event(start,location,subject,body,status, withwho, withwhomail))
+        list_event.append(Event(start,location,body,"c"))
         return list_event
  
 def get_list_event_gcal():

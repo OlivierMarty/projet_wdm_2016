@@ -20,7 +20,7 @@ except ImportError:
 # at ~/.credentials/gmail-python-quickstart.json
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = 'Gmail API Python Quickstart111'
+APPLICATION_NAME = 'Gmail API Python'
 
 
 def get_credentials():
@@ -72,7 +72,7 @@ def get_list_event_gmail():
 
 
 
-    keyword = raw_input('Please enter a keyword to start searching the related messages in the mailbox(ctrl+c for quit) : ').lower()
+    keyword = input('Please enter a keyword to start searching the related messages in the mailbox(ctrl+c for quit) : ').lower()
 
     for i in range(3):
         print()
@@ -111,8 +111,7 @@ def get_list_event_gmail():
                 mime_msg = GetMimeMessage(service,"me",msg['id'])
                 body = get_message_body(mime_msg)
                 
-                
-                list_event.append(Event(date,location,subject,body,status, withwho, withwhomail))
+                list_event.append(Event(date,location,body,"m"))
     return list_event
                 #print('Body:')
                 #print('%s' % msg_body)
