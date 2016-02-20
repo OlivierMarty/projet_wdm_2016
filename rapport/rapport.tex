@@ -23,27 +23,35 @@ internet qui concernent l'état de différents moyens de transport (lignes de
 métro, de train, stations vélo vide ou pleine, ou encore un bouchon sur
 l'autoroute (non implémenté)) afin de prévenir l'utilisateur lorsque celui-ci va
 les utiliser.
-Pour cela on se connecte à son agenda (Google calendar), et on analyse ses mails
+Pour cela on se connecte à son agenda (Google Calendar), et on analyse ses mails
 (Gmail) pour prévoir ses déplacements, mais d'autres sources pourrait être
 ajoutées, de façon modulaire.
 
 L'utilisateur est alors notifié par le medium de son choix (email, ou sms via
 l'API de free mobile).
 
-\section{Déscription technique}
+\section{Description technique}
 
 Le projet est divisé en trois principales composantes :
 
 \subsection{La classe event}
 
-\subsection{La classe source} Cette classe représente une information provenant
+Cette classe représente un événement auquel l'utilisateur va se rendre.
+Elle présente trois attributs : date, location, et description.
+Les instances sont produites à partir de deux sources : Google Calendar et
+Gmail.
+
+\subsection{La classe source}
+
+Cette classe représente une information provenant
 d'internet et qui concerne l'état d'un moyen de transport.
 Chaque instance doit fournir la méthode problem() (renvoit true si le moyen de
 transport encontre un problème), et les attributs id (identifiant de la source)
 et message (descriptif du problème).
 
-Ces instances sont produites par plusieurs fonctions qui vont chercher
-l'information idoine sur internet. Nous avons implémenté :
+Les instances sont produites par plusieurs fonctions qui vont chercher
+l'information idoine sur internet.
+Nous avons implémenté :
 
 \paragraph{ratp\_trafic} En scrappant l'url \url{http://ratp.fr/meteo/}, cette
 fonction est un générateur qui donne une source pour chaque ligne de la RATP.
@@ -66,13 +74,32 @@ message="Station vélo 42707 - okabe (le kremlin-bicetre) à 18h53 le 20/02 : pl
 que 2 places disponibles !"\} ou encore \{id="paris\_19001\_empty", message="Station
 vélo 19001 - ourcq crimee à 18h58 le 20/02 : plus qu'un vélo disponible !"\})
 
-\paragraph{} L'analyse de ces sources XML ou HTML est effectuée à l'aide de la
-bibliothèque Python BeautifulSoup4.
+\paragraph{} Le fichier find.py contient une aide pour trouver les identifiants
+utilisé en interne pour désigner une source.
+Il propose une recherche intéractive dans les listes téléchargées depuis les
+différentes API.
+
+\paragraph{} L'analyse des fichiers HTML ou JSON téléchargés est effectuée à
+l'aide de la bibliothèque Python
+\href{http://www.crummy.com/software/BeautifulSoup/bs4/doc/}{BeautifulSoup4}.
 Nous avions en premier lieu écrit des transformateurs en xquery pour formatter
 toutes les données dans un schéma commun, mais l'utilisation d'un logiciel
 externe (Saxon) rendait chaque requête très lente, d'autant que le résultat
 n'était pas un objet natif Python.
 
 \subsection{La boucle principale}
+
+Cette boucle articule les différents modules entre eux.
+Elle fonctionne à l'aide d'un tas qui contient des instances de la classe Event
+représentant les prochains événements dont le programme a connaissance.
+De temps en temps, elle appelle les générateurs d'événements (module event) pour
+vérifier si de nouveaux événements sont connus.
+Lorsqu'un un événement arrive à échéance (dans l'état actuel on vérifie une
+demi-heure avant l'échéance), la fonction source.from\_location génère une liste
+d'identifiants de sources qui devraient être utiles pour ce rendre à cet
+événement (lignes passant auprès du lieu, stations vélos proches). % TODO pas eencore implémenté comme ça
+Le module source récolte alors les informations, et si un problème est soulevé
+par l'une des sources, une notification est envoyée.
+
 
 \end{document}
