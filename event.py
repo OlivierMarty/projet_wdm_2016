@@ -20,3 +20,6 @@ class HeapEvent():
 
     def top(self):
         return self.data[0][1]
+
+    def empty(self):
+        return not self.data
