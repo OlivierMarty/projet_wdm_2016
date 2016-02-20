@@ -5,8 +5,7 @@ import datetime
 # SOURCE CLASSES
 
 class Source:
-  def __init__(self):
-    pass
+  pass
 
 
 class Source_ratp(Source):
@@ -83,7 +82,8 @@ class Source_transilien(Source):
 
 def ratp_trafic():
   for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
-    yield Source_ratp(tag['id'], tag.img['alt'], tag.select('span.perturb_message')[0].string)
+    yield Source_ratp(tag['id'], tag.img['alt'],\
+      tag['id'].replace('_', ' ') + ' : ' + tag.select('span.perturb_message')[0].string)
 
 
 def jcdecaux_vls():
