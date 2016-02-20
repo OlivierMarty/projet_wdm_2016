@@ -1,6 +1,7 @@
 from class_xml import XML
 import config
 import datetime
+from itertools import chain
 
 # SOURCE CLASSES
 
@@ -86,8 +87,8 @@ def ratp_trafic():
       tag['id'].replace('_', ' ') + ' : ' + tag.select('span.perturb_message')[0].string)
 
 
-def jcdecaux_vls():
-  ids = set(map(lambda s : s.rsplit('_', 1)[0], config.sources['jcdecaux_vls']))
+def jcdecaux_vls(ids):
+  ids = set(map(lambda s : s.rsplit('_', 1)[0], ids))
   for station in ids:
     (contract, number) = list(station.split('_'))
     xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + number + "?contract=" + contract + "&apiKey="+config.api_key['jcdecaux_vls'], lang="json")
@@ -112,3 +113,19 @@ def transilien():
       message += det.get_text()
     message = " ".join(message.split()) # delete multiple spaces
     yield Source_transilien(id, message)
+
+
+
+# interface functions
+
+def from_location(location):
+    """return a list of source ids useful for location
+    TODO : for the moment returns all ids in config.sources"""
+    lists = [values for (name, values) in config.sources.items()]
+    # return flattened list
+    return [item for sublist in lists for item in sublist]
+
+def gen_sources(ids):
+  return chain(ratp_trafic(),\
+      transilien(),\
+      jcdecaux_vls(config.sources['jcdecaux_vls'])) # TODO filter out ids for jcdecaux

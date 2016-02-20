@@ -4,8 +4,6 @@ from event import Event, HeapEvent
 from datetime import datetime, timedelta
 from time import sleep
 import notification
-from itertools import chain
-
 
 def main():
     heap = HeapEvent()
@@ -28,15 +26,16 @@ def main():
         # next event
         if not heap.empty() and heap.top().date-datetime.now() < gap:
             event = heap.pop()
+
+            # get useful ids of sources for this location
+            ids_sources = source.from_location(event.location)
+            # grab info from internet for these sources
+            sources=source.gen_sources(ids_sources)
+            for src in sources:
+              if src.id in ids_sources and src.problem():
+                # there is a problem ! We notify the user...
+                notification.notify(src.message)
             print(event.description + " at " + event.location + ", " + str(event.date))
 
 if __name__ == "__main__":
     main()
-
-
-#sources=chain(source.ratp_trafic(), source.transilien(), source.jcdecaux_vls())
-
-#for source in sources:
-#  if source.id in config.sources.get(source.source, []):
-#    if source.problem():
-#      notification.notify(source.message)
