@@ -16,7 +16,19 @@
 
 \maketitle
 
-\section{Présentation et objectifs du projet}
+\section{Présentation du projet}
+
+Le but de ce projet est d'utiliser différentes sources d'information sur
+internet qui concernent l'état de différents moyens de transport (lignes de
+métro, de train, stations vélo vide ou pleine, ou encore un bouchon sur
+l'autoroute (non implémenté)) afin de prévenir l'utilisateur lorsque celui-ci va
+les utiliser.
+Pour cela on se connecte à son agenda (Google calendar), et on analyse ses mails
+(Gmail) pour prévoir ses déplacements, mais d'autres sources pourrait être
+ajoutées, de façon modulaire.
+
+L'utilisateur est alors notifié par le medium de son choix (email, ou sms via
+l'API de free mobile).
 
 \section{Déscription technique}
 
@@ -35,12 +47,12 @@ l'information idoine sur internet. Nous avons implémenté :
 
 \paragraph{ratp\_trafic} En scrappant l'url \url{http://ratp.fr/meteo/}, cette
 fonction est un générateur qui donne une source pour chaque ligne de la RATP.
-(par exemple id="ligne\_rer\_B", message=""). % TODO message
+(par exemple \{id="ligne\_rer\_B", message=""\}). % TODO message
 Il est à noté que la ratp ne fournit aucune API publique.
 
 \paragraph{transilien} Idem, en scrappant l'url \url{http://www.transilien.com/info-trafic/temps-reel},
 cette fonction génère une liste de sources pour les lignes de la SNCF transilien
-(par exemple id=RER-C, message=""). % TODO message
+(par exemple \{id="RER-C", message=""\}). % TODO message
 La SNCF fournit une API pour chercher des itinéraires, ou avoir les prochains
 horaires, mais pas, à notre connaissance, pour avoir des informations de trafic.
 
@@ -49,10 +61,10 @@ horaires, mais pas, à notre connaissance, pour avoir des informations de trafic
 \url{https://developer.jcdecaux.com/#/opendata/vls}).
 Pour chaque station dont l'utilisateur est intéressé, elle génère deux sources :
 une qui déclenche un problème lorsque la station est presque vide, et l'autre
-lorsqu'elle est presque pleine (par exemple id="paris\_42707\_empty",
+lorsqu'elle est presque pleine (par exemple \{id="paris\_42707\_empty",
 message="Station vélo 42707 - okabe (le kremlin-bicetre) à 18h53 le 20/02 : plus
-que 2 places disponibles !" ou encore id="paris\_19001\_empty", message="Station
-vélo 19001 - ourcq crimee à 18h58 le 20/02 : plus qu'un vélo disponible !")
+que 2 places disponibles !"\} ou encore \{id="paris\_19001\_empty", message="Station
+vélo 19001 - ourcq crimee à 18h58 le 20/02 : plus qu'un vélo disponible !"\})
 
 \paragraph{} L'analyse de ces sources XML ou HTML est effectuée à l'aide de la
 bibliothèque Python BeautifulSoup4.
