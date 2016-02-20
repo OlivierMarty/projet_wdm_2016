@@ -6,6 +6,7 @@ from apiclient import discovery
 import oauth2client
 from oauth2client import client
 from oauth2client import tools
+from event import *
 
 import datetime
 
@@ -50,7 +51,64 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def main():
+
+
+def find_list_event_gcal(events):
+    list_event = []
+    
+    if not events:
+        print('No upcoming events found.')
+        return list_event
+
+    i = 0
+
+    for event in events:
+        i = i + 1
+        #print('The event #', i,'------------------------')
+        start = event['start'].get('dateTime', event['start'].get('date'))
+
+        #status :  confirmed or not
+        status = event['status']
+        #print('  Status:', event['status'])     
+        
+        #htmlLink:  the url of the event
+        #print('  HtmlLink:', event['htmlLink'])
+        
+        #created:   the created time of the event
+        #print('  Created time:', event['created'])
+        
+        #updateed:   the updated time of the event
+        #print('  Updatedtime:', event['updated'])
+        
+        body = ""
+        if ('description' in event):
+            body = event['description']
+            #print('  Description:', event['description'])
+       
+        subject = ""
+        if ('summary' in event):
+            subject = event['summary']
+            #print('  Sumarry:', event['summary'])
+        
+        location = ""
+        if ('location' in event):
+            location = event['location']
+            #print('  Location:', event['location'])
+
+        #print("  Organizer's name:", event['organizer'].get('displayName', 'unknown'))
+        withwho =  event['organizer'].get('displayName', 'unknown')
+
+        #print("  Organizer's email:", event['organizer']['email'])
+        withwhomail =  event['organizer']['email']
+
+        #print("  Start time:", event['start']['dateTime'])
+        #print(start, event['summary']);
+
+
+        list_event.append(Event(start,location,subject,body,status, withwho, withwhomail))
+        return list_event
+ 
+def get_list_event_gcal():
     """Shows basic usage of the Google Calendar API.
 
     Creates a Google Calendar API service object and outputs a list of the next
@@ -61,45 +119,11 @@ def main():
     service = discovery.build('calendar', 'v3', http=http)
 
     now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
+    print('Getting the upcoming 10 events...')
     eventsResult = service.events().list(
         calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
         orderBy='startTime').execute()
     events = eventsResult.get('items', [])
 
-    if not events:
-        print('No upcoming events found.')
+    return find_list_event_gcal(events)
 
-    i=0
-    for event in events:
-        i = i + 1
-        print('The event #', i,'------------------------')
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        
-        #status :  confirmed or not
-        print('  Status:', event['status'])     
-        
-        #htmlLink:  the url of the event
-        print('  HtmlLink:', event['htmlLink'])
-        
-        #created:   the created time of the event
-        print('  Created time:', event['created'])
-        
-        #updateed:   the updated time of the event
-        print('  Updatedtime:', event['updated'])
-        
-        #summary:   the description of the event
-        if ('description' in event):
-            print('  Description:', event['description'])
-        
-        if ('location' in event):
-            print('  Location:', event['location'])
-
-        print("  Organizer's name:", event['organizer'].get('displayName', 'unknown'))
-        print("  Organizer's email:", event['organizer']['email'])
-
-        print("  Start time:", event['start']['dateTime'])
-        #print(start, event['summary']);
-
-if __name__ == '__main__':
-    main()

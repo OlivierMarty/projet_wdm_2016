@@ -8,6 +8,8 @@ import oauth2client
 from oauth2client import client
 from oauth2client import tools
 from gmail_msg import *
+from event import *
+
 try:
     import argparse
     flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
@@ -49,39 +51,8 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def search(service, labels):
-    while True:
-        keyword = raw_input('Please enter a keyword to start searching the related messages in the mailbox(ctrl+c for quit) : ').lower()
-
-        for i in range(3):
-            print()
-        
-        #print('Labels:')
-        for label in labels:
-            if (label['name']=='INBOX'):
-                print(label['name'])        
-                list_msg = ListMessagesMatchingQuery(service,"me", query=keyword)
-                #list_msg = ListMessagesWithLabels(service, "me", label['id'])
-                #print(list_msg)
-                i = 0
-                for msg in list_msg:
-                    i = i + 1
-                    print()
-                    print('Message #%d:'% i)
-                    print('----')
-                    msg = GetMessage(service,"me",msg['id'])
-                    get_message_header(msg)
-                    
-                    mime_msg = GetMimeMessage(service,"me",msg['id'])
-                    msg_body = get_message_body(mime_msg)
-                    print('Body:')
-                    print('%s' % msg_body)
-                  
-                    #print(GetMessage(service, "me", msg['id']))
-                    #GetMimeMessage(service,"me",msg['id'])
-        print()
-        
-def main():
+def get_list_event_gmail():
+    
     """
     Creates a Gmail API service object and outputs a list of messages which contain the keyword in the user's Gmail account.
    
@@ -92,11 +63,60 @@ def main():
     service = discovery.build('gmail', 'v1', http=http)
     results = service.users().labels().list(userId='me').execute()
     labels = results.get('labels', [])
+
+
+    list_event = []
     if not labels:
         print('No labels found.')
-    else:
-        search(service, labels)
+        return list_event
 
-if __name__ == '__main__':
-    main()
 
+
+    keyword = raw_input('Please enter a keyword to start searching the related messages in the mailbox(ctrl+c for quit) : ').lower()
+
+    for i in range(3):
+        print()
+        
+    #print('Labels:')
+    for label in labels:
+        if (label['name']=='INBOX'):
+            print(label['name'])        
+            list_msg = ListMessagesMatchingQuery(service,"me", query=keyword)
+            #list_msg = ListMessagesWithLabels(service, "me", label['id'])
+            #print(list_msg)
+            i = 0
+            for msg in list_msg:
+                i = i + 1
+                #print()
+                #print('Message #%d:'% i)
+                #print('----')
+                msg = GetMessage(service,"me",msg['id'])
+                headers = get_message_header(msg)
+                
+                withwho = withwhomail = subject = date = location = body = status = ""
+                for e in headers:
+                    if (e['name']=='From'):
+                        #print 'Receive from: %s' % e['value']
+                        withwhomail = e['value']
+                        
+                    if (e['name']=='Subject'):
+                        #print 'Subject: %s' % e['value']
+                        subject = e['value']
+
+
+                    if (e['name']=='Date'):
+                        #print 'Date: %s' % e['value']
+                        date = e['value']
+                                  
+                mime_msg = GetMimeMessage(service,"me",msg['id'])
+                body = get_message_body(mime_msg)
+                
+                
+                list_event.append(Event(date,location,subject,body,status, withwho, withwhomail))
+    return list_event
+                #print('Body:')
+                #print('%s' % msg_body)
+                  
+                #print(GetMessage(service, "me", msg['id']))
+                #GetMimeMessage(service,"me",msg['id'])
+    #print()

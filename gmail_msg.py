@@ -102,13 +102,16 @@ def get_message_header(message):
    
     #print 'Message snippet: %s' % message['snippet']
     headers = message['payload']['headers']
-    for e in headers:
-        if (e['name']=='From'):
-            print 'Receive from: %s' % e['value']
-        if (e['name']=='Subject'):
-            print 'Subject: %s' % e['value']
-        if (e['name']=='Date'):
-            print 'Date: %s' % e['value']
+
+    return headers
+
+    #for e in headers:
+     #   if (e['name']=='From'):
+      #      print 'Receive from: %s' % e['value']
+       # if (e['name']=='Subject'):
+        #    print 'Subject: %s' % e['value']
+        #if (e['name']=='Date'):
+         #   print 'Date: %s' % e['value']
 
 
 def GetMimeMessage(service, user_id, msg_id):
