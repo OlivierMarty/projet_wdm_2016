@@ -120,12 +120,10 @@ def transilien():
 
 def from_location(location):
     """return a list of source ids useful for location
-    TODO : for the moment returns all ids in config.sources"""
-    lists = [values for (name, values) in config.sources.items()]
-    # return flattened list
-    return [item for sublist in lists for item in sublist]
+    TODO : for the moment returns the whole config.sources"""
+    return config.sources
 
 def gen_sources(ids):
   return chain(ratp_trafic(),\
       transilien(),\
-      jcdecaux_vls(config.sources['jcdecaux_vls'])) # TODO filter out ids for jcdecaux
+      jcdecaux_vls(ids.get('jcdecaux_vls', [])))

@@ -13,7 +13,6 @@ def main():
     gap = timedelta(minutes=30) # 30 minutes : time to check trafic before an event
     while True:
         # TODO feed heap
-        # then look for problems
 
         # sleep the min between 1 minute and the next event - gap
         next = timedelta(seconds=1) # TODO 1 minute
@@ -26,16 +25,18 @@ def main():
         # next event
         if not heap.empty() and heap.top().date-datetime.now() < gap:
             event = heap.pop()
+            print(event.description + " at " + event.location + ", " + str(event.date))
 
             # get useful ids of sources for this location
             ids_sources = source.from_location(event.location)
+            # flatten this dictionnary
+            ids_sources_flat = [item for (key, sublist) in ids_sources.items() for item in sublist]
             # grab info from internet for these sources
             sources=source.gen_sources(ids_sources)
             for src in sources:
-              if src.id in ids_sources and src.problem():
+              if src.id in ids_sources_flat and src.problem():
                 # there is a problem ! We notify the user...
                 notification.notify(src.message)
-            print(event.description + " at " + event.location + ", " + str(event.date))
 
 if __name__ == "__main__":
     main()
