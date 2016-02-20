@@ -1,34 +1,22 @@
-from gmail import *
+import heapq
 
-class event:
-    def __init__(self):
-        pass
-
-class Event(event):
-    def __init__(self, date, location, subject, body, status, withwho, withwhomail):
+class Event():
+    def __init__(self, date, location, description):
         self.date = date
         self.location = location
-        self.subject = subject
-        self.body = body
-        self.status = status
-        self.withwho = withwho
-        self.withwhomail = withwhomail
-        
-    def affiche(self):
-        if self.status != "":
-            print('<Status>: %s' % self.status)
-        print('<Date>: %s' % self.date)
-        if self.withwho != "" :
-            print('<Organiser>: %s' % self.withwho)
-        print('<Organiser\'s email>: %s' % self.withwhomail)
-        
-        if self.location != "":
-            print('<Location>: %s' % self.location)
-        print('<Subject>: %s' % self.subject)
-        print('<Body>: %s' % self.body)
-        
-    def problem(self):
-        #TODO: Call the function of RATP
-        return "TODO"
-    
+        self.description = description
 
+
+class HeapEvent():
+    """Heap for event : sort event according to their dates"""
+    def __init__(self):
+        self.data = []
+
+    def push(self, event):
+        heapq.heappush(self.data, (event.date, event))
+
+    def pop(self):
+        return heapq.heappop(self.data)[1]
+
+    def top(self):
+        return self.data[0][1]
