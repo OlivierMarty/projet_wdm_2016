@@ -20,4 +20,47 @@
 
 \section{Déscription technique}
 
+Le projet est divisé en trois principales composantes :
+
+\subsection{La classe event}
+
+\subsection{La classe source} Cette classe représente une information provenant
+d'internet et qui concerne l'état d'un moyen de transport.
+Chaque instance doit fournir la méthode problem() (renvoit true si le moyen de
+transport encontre un problème), et les attributs id (identifiant de la source)
+et message (descriptif du problème).
+
+Ces instances sont produites par plusieurs fonctions qui vont chercher
+l'information idoine sur internet. Nous avons implémenté :
+
+\paragraph{ratp\_trafic} En scrappant l'url \url{http://ratp.fr/meteo/}, cette
+fonction est un générateur qui donne une source pour chaque ligne de la RATP.
+(par exemple id="ligne\_rer\_B", message=""). % TODO message
+Il est à noté que la ratp ne fournit aucune API publique.
+
+\paragraph{transilien} Idem, en scrappant l'url \url{http://www.transilien.com/info-trafic/temps-reel},
+cette fonction génère une liste de sources pour les lignes de la SNCF transilien
+(par exemple id=RER-C, message=""). % TODO message
+La SNCF fournit une API pour chercher des itinéraires, ou avoir les prochains
+horaires, mais pas, à notre connaissance, pour avoir des informations de trafic.
+
+\paragraph{jcdecaux\_vls} Cette fonction se connecte à l'API de jcdecaux\_vls
+(les vélos libres services de jcdecaux, comme les Vélib', voir
+\url{https://developer.jcdecaux.com/#/opendata/vls}).
+Pour chaque station dont l'utilisateur est intéressé, elle génère deux sources :
+une qui déclenche un problème lorsque la station est presque vide, et l'autre
+lorsqu'elle est presque pleine (par exemple id="paris\_42707\_empty",
+message="Station vélo 42707 - okabe (le kremlin-bicetre) à 18h53 le 20/02 : plus
+que 2 places disponibles !" ou encore id="paris\_19001\_empty", message="Station
+vélo 19001 - ourcq crimee à 18h58 le 20/02 : plus qu'un vélo disponible !")
+
+\paragraph{} L'analyse de ces sources XML ou HTML est effectuée à l'aide de la
+bibliothèque Python BeautifulSoup4.
+Nous avions en premier lieu écrit des transformateurs en xquery pour formatter
+toutes les données dans un schéma commun, mais l'utilisation d'un logiciel
+externe (Saxon) rendait chaque requête très lente, d'autant que le résultat
+n'était pas un objet natif Python.
+
+\subsection{La boucle principale}
+
 \end{document}
