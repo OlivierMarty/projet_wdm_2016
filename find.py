@@ -1,21 +1,15 @@
 import config
 from class_xml import XML
+from source import *
 
 
 def find_id():
   t = int(input('Sélectionnez la source :\n\t1 : ratp\n\t2 : transilien\n\t3 : jcdecaux_vls (vélos en libre service)\n'))
   if t == 1: # RATP
-    print('Téléchargement de la liste des lignes...')
-    xml = XML(url='http://www.ratp.fr/meteo/', lang='html')
-    dic = {tag['id']: tag['id'].replace('_', ' ') for tag in xml.data.select('.encadre_ligne')}
+    dic = SourceProvider_ratp().dic_of_names()
 
   elif t == 2: # transilien
-    print('Téléchargement de la liste des lignes...')
-    xml = XML(url='http://www.transilien.com/info-trafic/temps-reel', lang='html')
-    dic = {}
-    for line in xml.data.select('div.b_info_trafic')[0].find_all('div', recursive=False):
-      id = line.select('.picto-transport')[1].get_text()
-      dic[id] = id.replace('-', ' ')
+    dic = SourceProvider_transilien().dic_of_names()
 
   elif t == 3: # jcdecaux_vls
     print('Téléchargment de la liste des villes...')
@@ -33,16 +27,7 @@ def find_id():
       if contract in contracts:
         break;
       print("Ville inconnue !\n\n")
-    print('Téléchargement de la liste des stations...')
-    if contract:
-      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?contract=' + contract + '&apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
-    else:
-      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
-    dic = {}
-    for sta in xml.data.json.find_all("item", recursive=False):
-      dic[sta.contract_name.string.lower() + '_' + sta.number.string] =\
-        sta.find('name').string + ' (' + sta.address.get_text() + ')'
-      # we use find('name') because .name is the current tag name
+    dic = SourceProvider_jcdecaux_vls().dic_of_names(contract)
   else:
     raise ValueError('mauvaise réponse !')
 

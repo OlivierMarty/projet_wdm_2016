@@ -9,7 +9,7 @@ class Source:
   pass
 
 class SourceProvider:
-  def dic_of_name(self):
+  def dic_of_names(self):
     """Returns a dictionnary mapping ids to name (for find.py)"""
     return []
 
@@ -20,6 +20,9 @@ class SourceProvider:
   def sources_of_ids(self, ids):
     """Returns a generator of Source these ids"""
     return []
+
+
+############## RATP ##############
 
 class Source_ratp(Source):
   def __init__(self, ident, status, message):
@@ -36,15 +39,12 @@ class SourceProvider_ratp(SourceProvider):
     self.names = None
     self.positions = None
 
-  def get_names(self):
+  def dic_of_names(self):
     if not self.names:
       print('Téléchargement de la liste des lignes ratp...')
       xml = XML(url='http://www.ratp.fr/meteo/', lang='html')
       self.names = {tag['id']: tag['id'].replace('_', ' ') for tag in xml.data.select('.encadre_ligne')}
     return self.names
-
-  def dic_of_name(self):
-    return get_names()
 
   def dic_of_positions(self):
     return {} # TODO API ratp
@@ -55,6 +55,8 @@ class SourceProvider_ratp(SourceProvider):
         yield Source_ratp(tag['id'], tag.img['alt'],\
           tag['id'].replace('_', ' ') + ' : ' + tag.select('span.perturb_message')[0].string)
 
+
+############## JCDECAUX_VLS ##############
 
 class Source_jcdecaux_vls(Source):
   def __init__(self, ident, nom, timestamp, status):
@@ -108,10 +110,21 @@ class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
 
 class SourceProvider_jcdecaux_vls(SourceProvider):
   def __init__(self):
-    pass
+    self.names = None
 
-  def dic_of_name(self):
-    return {} # TODO
+  def dic_of_names(self, contract=None):
+    if not self.names:
+      print('Téléchargement de la liste des stations...')
+      if contract:
+        xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?contract=' + contract + '&apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
+      else:
+        xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
+      self.names = {}
+      for sta in xml.data.json.find_all("item", recursive=False):
+        self.names[sta.contract_name.string.lower() + '_' + sta.number.string] =\
+          sta.find('name').string + ' (' + sta.address.get_text() + ')'
+        # we use find('name') because .name is the current tag name
+    return self.names
 
   def dic_of_positions(self):
     return {} # TODO
@@ -127,32 +140,36 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
       if contract + '_' + number + '_empty' in ids:
         yield Source_jcdecaux_vls_empty(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
-class SourceProvider_transilien(SourceProvider):
-  class Source_transilien(Source):
-    def __init__(self, ident, message):
-      self.source = 'transilien'
-      self.id = ident
-      self.message = message
 
-    def problem(self):
-      return self.message != 'Trafic normal'
+############## TRANSILIEN ##############
+
+class Source_transilien(Source):
+  def __init__(self, ident, message):
+    self.source = 'transilien'
+    self.id = ident
+    self.message = message
+
+  def problem(self):
+    return self.message != 'Trafic normal'
+
+class SourceProvider_transilien(SourceProvider):
 
   def __init__(self):
     self.names = None
     self.positions = None
 
-  def get_names(self):
+  def dic_of_names(self):
     if not self.names:
-      print('Téléchargement de la liste des lignes ratp...')
-      xml = XML(url='http://www.ratp.fr/meteo/', lang='html')
-      self.names = {tag['id']: tag['id'].replace('_', ' ') for tag in xml.data.select('.encadre_ligne')}
+      print('Téléchargement de la liste des lignes transilien...')
+      xml = XML(url='http://www.transilien.com/info-trafic/temps-reel', lang='html')
+      self.names = {}
+      for line in xml.data.select('div.b_info_trafic')[0].find_all('div', recursive=False):
+        id = line.select('.picto-transport')[1].get_text()
+        self.names[id] = id.replace('-', ' ')
     return self.names
 
-  def dic_of_name(self):
-    return get_names()
-
   def dic_of_positions(self):
-    return {} # TODO API ratp
+    return {} # TODO
 
   def sources_of_ids(self, ids):
     xml = XML(url="http://www.transilien.com/info-trafic/temps-reel", lang="html").data
