@@ -8,7 +8,7 @@ def get_events():
 
 def main():
     for event in get_events():
-        print(str(event.affiche))
+        print(str(event))
 
 if __name__ == '__main__':
     main()
