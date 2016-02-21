@@ -1,24 +1,21 @@
 import heapq
 
 class Event():
-    def __init__(self, date, location, description, eid = "c"):
+    """
+      date : type datetime.datetime
+      location : str
+      description : str
+    """
+    def __init__(self, date, location, description):
         self.date = date
         self.location = location
         self.description = description
-        self.eid = eid
 
     def affiche(self):
-        print('<Date>: %s' % self.date)
-        print('<Location>: %s' % self.location)
+        print('<Date>: ' + str(self.date))
+        print('<Location>: ' + self.location)
+        print('<Description>: ' + self.description)
 
-        if (self.eid == "m"):
-            print('<Description>: %s' % self.description.decode())
-        elif (self.eid == "c"):
-            print('<Body>: %s' % self.description)       
-              
-    def problem(self):
-        #TODO: Call the function of RATP
-        return "TODO"
 
 class HeapEvent():
     """Heap for event : sort event according to their dates"""
@@ -36,8 +33,3 @@ class HeapEvent():
 
     def empty(self):
         return not self.data
-
-        
- 
-    
-

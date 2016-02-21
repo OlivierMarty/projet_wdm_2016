@@ -6,9 +6,9 @@ from apiclient import discovery
 import oauth2client
 from oauth2client import client
 from oauth2client import tools
-from event import *
+from event import Event
 
-import datetime
+from datetime import datetime
 
 try:
     import argparse
@@ -55,61 +55,27 @@ def get_credentials():
 
 def find_list_event_gcal(events):
     list_event = []
-    
+
     if not events:
         print('No upcoming events found.')
         return list_event
 
-    i = 0
-
     for event in events:
-        i = i + 1
-        #print('The event #', i,'------------------------')
-        start = event['start'].get('dateTime', event['start'].get('date'))
+        if 'dateTime' in event['start']:
+            # replace last ':' by ''
+            start = event['start']['dateTime']
+            start = start.rsplit(':', 1)
+            start = "".join(start)
+            date = datetime.strptime(start, '%Y-%m-%dT%H:%M:%S%z')
+        else:
+            # TODO strptime, quel est le format dans ce cas ?
+            date = event['start']['date']
 
-        #status :  confirmed or not
-        status = event['status']
-        #print('  Status:', event['status'])     
-        
-        #htmlLink:  the url of the event
-        #print('  HtmlLink:', event['htmlLink'])
-        
-        #created:   the created time of the event
-        #print('  Created time:', event['created'])
-        
-        #updateed:   the updated time of the event
-        #print('  Updatedtime:', event['updated'])
-        
-        body = ""
-        if ('description' in event):
-            body = event['description']
-            #print('  Description:', event['description'])
-       
-        subject = ""
-        if ('summary' in event):
-            subject = event['summary']
-            #print('  Sumarry:', event['summary'])
-        
-        location = ""
-        if ('location' in event):
-            location = event['location']
-            if (type(location) == 'bytes'):
-                location = location.decode()
-            #print('  Location:', event['location'])
+        location = event.get('location', b'').decode()
+        description = event.get('description', 'no description')
+        list_event.append(Event(date, location, description))
+    return list_event
 
-        #print("  Organizer's name:", event['organizer'].get('displayName', 'unknown'))
-        withwho =  event['organizer'].get('displayName', 'unknown')
-
-        #print("  Organizer's email:", event['organizer']['email'])
-        withwhomail =  event['organizer']['email']
-
-        #print("  Start time:", event['start']['dateTime'])
-        #print(start, event['summary']);
-
-
-        list_event.append(Event(start,location,body,"c"))
-        return list_event
- 
 def get_list_event_gcal():
     """Shows basic usage of the Google Calendar API.
 
@@ -120,7 +86,7 @@ def get_list_event_gcal():
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http)
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
     print('Getting the upcoming 10 events...')
     eventsResult = service.events().list(
         calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
@@ -128,4 +94,3 @@ def get_list_event_gcal():
     events = eventsResult.get('items', [])
 
     return find_list_event_gcal(events)
-
