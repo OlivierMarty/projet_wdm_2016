@@ -8,6 +8,18 @@ from itertools import chain
 class Source:
   pass
 
+class SourceProvider:
+  def dic_of_name(self):
+    """Returns a dictionnary mapping ids to name (for find.py)"""
+    return []
+
+  def dic_of_positions(self):
+    """Returns a disctionnary mapping ids to position (for geocoding.py)"""
+    return []
+
+  def sources_of_ids(self, ids):
+    """Returns a generator of Source these ids"""
+    return []
 
 class Source_ratp(Source):
   def __init__(self, ident, status, message):
@@ -18,6 +30,31 @@ class Source_ratp(Source):
 
   def problem(self):
     return self.status != 'normal'
+
+class SourceProvider_ratp(SourceProvider):
+  def __init__(self):
+    self.names = None
+    self.positions = None
+
+  def get_names(self):
+    if not self.names:
+      print('Téléchargement de la liste des lignes ratp...')
+      xml = XML(url='http://www.ratp.fr/meteo/', lang='html')
+      self.names = {tag['id']: tag['id'].replace('_', ' ') for tag in xml.data.select('.encadre_ligne')}
+    return self.names
+
+  def dic_of_name(self):
+    return get_names()
+
+  def dic_of_positions(self):
+    return {} # TODO API ratp
+
+  def sources_of_ids(self, ids):
+    for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
+      if tag['id'] in ids:
+        yield Source_ratp(tag['id'], tag.img['alt'],\
+          tag['id'].replace('_', ' ') + ' : ' + tag.select('span.perturb_message')[0].string)
+
 
 class Source_jcdecaux_vls(Source):
   def __init__(self, ident, nom, timestamp, status):
@@ -69,51 +106,71 @@ class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
     return super(Source_jcdecaux_vls_empty, self).problem() or self.bikes <= config.sources_params['jcdecaux_vls']['limit_empty']
 
 
-class Source_transilien(Source):
-  def __init__(self, ident, message):
-    self.source = 'transilien'
-    self.id = ident
-    self.message = message
+class SourceProvider_jcdecaux_vls(SourceProvider):
+  def __init__(self):
+    pass
 
-  def problem(self):
-    return self.message != 'Trafic normal'
+  def dic_of_name(self):
+    return {} # TODO
 
+  def dic_of_positions(self):
+    return {} # TODO
 
-# SOURCES GENERATORS
+  def sources_of_ids(self, ids):
+    ids_set = set(map(lambda s : s.rsplit('_', 1)[0], ids))
+    for station in ids_set:
+      (contract, number) = list(station.split('_'))
+      xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + number + "?contract=" + contract + "&apiKey="+config.api_key['jcdecaux_vls'], lang="json")
+      tag = xml.data.json
+      if contract + '_' + number + '_full' in ids:
+        yield Source_jcdecaux_vls_full(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
+      if contract + '_' + number + '_empty' in ids:
+        yield Source_jcdecaux_vls_empty(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
-def ratp_trafic():
-  for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
-    yield Source_ratp(tag['id'], tag.img['alt'],\
-      tag['id'].replace('_', ' ') + ' : ' + tag.select('span.perturb_message')[0].string)
+class SourceProvider_transilien(SourceProvider):
+  class Source_transilien(Source):
+    def __init__(self, ident, message):
+      self.source = 'transilien'
+      self.id = ident
+      self.message = message
 
+    def problem(self):
+      return self.message != 'Trafic normal'
 
-def jcdecaux_vls(ids):
-  ids = set(map(lambda s : s.rsplit('_', 1)[0], ids))
-  for station in ids:
-    (contract, number) = list(station.split('_'))
-    xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + number + "?contract=" + contract + "&apiKey="+config.api_key['jcdecaux_vls'], lang="json")
-    tag = xml.data.json
-    yield Source_jcdecaux_vls_full(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
-    yield Source_jcdecaux_vls_empty(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
+  def __init__(self):
+    self.names = None
+    self.positions = None
 
+  def get_names(self):
+    if not self.names:
+      print('Téléchargement de la liste des lignes ratp...')
+      xml = XML(url='http://www.ratp.fr/meteo/', lang='html')
+      self.names = {tag['id']: tag['id'].replace('_', ' ') for tag in xml.data.select('.encadre_ligne')}
+    return self.names
 
-def transilien():
-  xml = XML(url="http://www.transilien.com/info-trafic/temps-reel", lang="html").data
-  container = xml.select('div.b_info_trafic')[0]
-  for line in container.find_all('div', recursive=False):
-    id = line.select('.picto-transport')[1].get_text()
-    message = ""
-    for c in line.select_one('.title').children:
-      if c.name: # a tag
-        if 'picto-transport' not in c.attrs.get('class', ''):
-          message += c.get_text()
-      else: # a string
-        message += c
-    for det in line.select('.item-disruption'):
-      message += det.get_text()
-    message = " ".join(message.split()) # delete multiple spaces
-    yield Source_transilien(id, message)
+  def dic_of_name(self):
+    return get_names()
 
+  def dic_of_positions(self):
+    return {} # TODO API ratp
+
+  def sources_of_ids(self, ids):
+    xml = XML(url="http://www.transilien.com/info-trafic/temps-reel", lang="html").data
+    container = xml.select('div.b_info_trafic')[0]
+    for line in container.find_all('div', recursive=False):
+      id = line.select('.picto-transport')[1].get_text()
+      if id in ids:
+        message = ""
+        for c in line.select_one('.title').children:
+          if c.name: # a tag
+            if 'picto-transport' not in c.attrs.get('class', ''):
+              message += c.get_text()
+          else: # a string
+            message += c
+        for det in line.select('.item-disruption'):
+          message += det.get_text()
+        message = " ".join(message.split()) # delete multiple spaces
+        yield self.Source_transilien(id, message)
 
 
 # interface functions
@@ -123,7 +180,11 @@ def from_location(location):
     TODO : for the moment returns the whole config.sources"""
     return config.sources
 
+sp_ratp = SourceProvider_ratp()
+sp_jcdecaux_vls = SourceProvider_jcdecaux_vls()
+sp_transilien = SourceProvider_transilien()
+
 def gen_sources(ids):
-  return chain(ratp_trafic(),\
-      transilien(),\
-      jcdecaux_vls(ids.get('jcdecaux_vls', [])))
+  return chain(sp_ratp.sources_of_ids(ids.get('ratp_trafic', [])),\
+      sp_transilien.sources_of_ids(ids.get('transilien', [])),\
+      sp_jcdecaux_vls.sources_of_ids(ids.get('jcdecaux_vls', [])))
