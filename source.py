@@ -198,11 +198,3 @@ class SourceProvider_transilien(SourceProvider):
           message += det.get_text()
         message = " ".join(message.split()) # delete multiple spaces
         yield Source_transilien(id, message)
-
-
-# interface functions
-
-def from_location(location):
-    """return a list of source ids useful for location
-    TODO : for the moment returns the whole config.sources"""
-    return config.sources
