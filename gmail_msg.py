@@ -128,9 +128,7 @@ def GetMimeMessage(service, user_id, msg_id):
         #print 'Message snippet: %s' % message['snippet']
 
         msg_str = base64.urlsafe_b64decode(message['raw'].encode('ASCII'))
-
-        print()
-        print(type(msg_str))
+     
         mime_msg = email.message_from_string(msg_str.decode())
       
         return mime_msg

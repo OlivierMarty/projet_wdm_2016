@@ -109,9 +109,8 @@ def get_list_event_gmail():
                         date = e['value']
                                   
                 mime_msg = GetMimeMessage(service,"me",msg['id'])
-                body = get_message_body(mime_msg)
-                
-                list_event.append(Event(date,location,body,"m"))
+                body = get_message_body(mime_msg).decode()
+                list_event.append(Event(date,location,body))
     return list_event
                 #print('Body:')
                 #print('%s' % msg_body)

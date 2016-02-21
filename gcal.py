@@ -70,9 +70,14 @@ def find_list_event_gcal(events):
         else:
             # TODO strptime, quel est le format dans ce cas ?
             date = event['start']['date']
-
-        location = event.get('location', b'').decode()
+        
+        location = event.get('location', b'')
+        if (not isinstance(location,str)):
+            location = location.decode()
+            
         description = event.get('description', 'no description')
+        if (not isinstance(description,str)):
+            description = description.decode()
         list_event.append(Event(date, location, description))
     return list_event
 
