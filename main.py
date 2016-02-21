@@ -18,33 +18,40 @@ def make_tz_aware(dt, tz='UTC', is_dst=None):
 
 
 def main():
+    event_seen = set()
     heap = HeapEvent()
-    heap.push(Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "Villejuif", "descr Villejuif"))
-    heap.push(Event('manual_2', datetime.now()+timedelta(minutes=30, seconds=3), "Cachan", "descr Cachan"))
-    heap.push(Event('manual_3', datetime.now()+timedelta(minutes=30, seconds=12), "université paris 7", "descr p7"))
+    manual = [Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "Villejuif", "descr Villejuif"),
+      Event('manual_2', datetime.now()+timedelta(minutes=30, seconds=3), "Cachan", "descr Cachan"),
+      Event('manual_3', datetime.now()+timedelta(minutes=30, seconds=12), "université paris 7", "descr p7")]
     gap = timedelta(minutes=30) # 30 minutes : time to check trafic before an event
     refresh = timedelta(seconds=30) # grab events every 30 secondes
     while True:
         # feed heap
-        ids = [e[1].id for e in heap.data]
-        for event in get_events():
+        for event in get_events() + manual:
             # check if we already know it
-            if event.id not in ids:
-                print("Add event:")
+            if event.id not in event_seen:
+                event_seen.add(event.id)
+                print()
+                if (event.date - datetime.now()).total_seconds() < 0:
+                    print("Ignore event in the past:")
+                else:
+                    print("Add event:")
+                    heap.push(event)
                 print(str(event))
-                heap.push(event)
 
         # sleep the min between 1 minute and the next event - gap
         next = refresh
         if not heap.empty():
             next = min(next, heap.top().date-datetime.now()-gap)
         if next.total_seconds() > 0:
+            print()
             print("Sleeping " + str(next))
             sleep(next.total_seconds())
 
         # next event
         if not heap.empty() and heap.top().date-datetime.now() < gap:
             event = heap.pop()
+            print()
             print("Check event:")
             print(str(event))
 
@@ -54,6 +61,8 @@ def main():
             ids_sources_flat = [item for (key, sublist) in ids_sources.items() for item in sublist]
             # grab info from internet for these sources
             sources=source.gen_sources(ids_sources)
+            if 'print' in config.notification['methods']:
+                print() # show an empty line
             for src in sources:
               if src.id in ids_sources_flat and src.problem():
                 # there is a problem ! We notify the user...
