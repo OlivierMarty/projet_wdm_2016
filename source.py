@@ -187,7 +187,7 @@ class SourceProvider_transilien(SourceProvider):
         for det in line.select('.item-disruption'):
           message += det.get_text()
         message = " ".join(message.split()) # delete multiple spaces
-        yield self.Source_transilien(id, message)
+        yield Source_transilien(id, message)
 
 
 # interface functions
@@ -197,11 +197,15 @@ def from_location(location):
     TODO : for the moment returns the whole config.sources"""
     return config.sources
 
-sp_ratp = SourceProvider_ratp()
-sp_jcdecaux_vls = SourceProvider_jcdecaux_vls()
-sp_transilien = SourceProvider_transilien()
+sp_ratp = None
+sp_jcdecaux_vls = None
+sp_transilien = None
 
 def gen_sources(ids):
+  global sp_ratp, sp_jcdecaux_vls, sp_transilien
+  sp_ratp = sp_ratp or SourceProvider_ratp()
+  sp_jcdecaux_vls = sp_jcdecaux_vls or SourceProvider_jcdecaux_vls()
+  sp_transilien = sp_transilien or SourceProvider_transilien()
   return chain(sp_ratp.sources_of_ids(ids.get('ratp_trafic', [])),\
       sp_transilien.sources_of_ids(ids.get('transilien', [])),\
       sp_jcdecaux_vls.sources_of_ids(ids.get('jcdecaux_vls', [])))
