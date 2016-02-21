@@ -9,6 +9,8 @@ from oauth2client import tools
 from event import Event
 
 from datetime import datetime
+import pytz
+utc=pytz.UTC
 
 try:
     import argparse
@@ -71,6 +73,7 @@ def find_list_event_gcal(events):
             # TODO strptime, quel est le format dans ce cas ?
             date = event['start']['date']
         
+        date = date.replace(tzinfo = None)
         location = event.get('location', b'')
         if (not isinstance(location,str)):
             location = location.decode()
