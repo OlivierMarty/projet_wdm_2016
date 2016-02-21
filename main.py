@@ -1,9 +1,10 @@
-import source
+from source import *
 import config
 from event import Event, HeapEvent
 from datetime import datetime, timedelta
 from time import sleep
 import notification
+from geocoding import position_of_location, k_neighbors
 from analyse_event import *
 
 def make_tz_aware(dt, tz='UTC', is_dst=None):
@@ -15,9 +16,21 @@ def make_tz_aware(dt, tz='UTC', is_dst=None):
         pass
     return tz.localize(dt, is_dst=is_dst)
 
-
+def gen_sources(sourceProviders, location):
+  position = position_of_location(location)
+  if not position:
+    print("Unable to find a position for " + location)
+  else:
+    for sp in sourceProviders:
+      # keep 2 nearest sources, if distance < 5 km
+      ids = [id for (dist, id) in k_neighbors(sp.dic_of_positions(), position, 2) if dist < 5]
+      for source in sp.sources_of_ids(ids):
+          yield source
 
 def main():
+    sourceProviders = [SourceProvider_ratp(),
+      SourceProvider_jcdecaux_vls(),
+      SourceProvider_transilien()]
     event_seen = set()
     heap = HeapEvent()
     manual = [Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "Villejuif", "descr Villejuif"),
@@ -55,16 +68,12 @@ def main():
             print("Check event:")
             print(str(event))
 
-            # get useful ids of sources for this location
-            ids_sources = source.from_location(event.location)
-            # flatten this dictionary
-            ids_sources_flat = [item for (key, sublist) in ids_sources.items() for item in sublist]
-            # grab info from internet for these sources
-            sources=source.gen_sources(ids_sources)
+            # get useful ids of sources for this location, and grab info from internet
+            sources=gen_sources(sourceProviders, event.location)
             if 'print' in config.notification['methods']:
                 print() # show an empty line
             for src in sources:
-              if src.id in ids_sources_flat and src.problem():
+              if src.problem():
                 # there is a problem ! We notify the user...
                 notification.notify(src.message)
 

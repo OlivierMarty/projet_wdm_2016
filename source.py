@@ -134,7 +134,7 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
       xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
       self.positions = {}
       for sta in xml.data.json.find_all("item", recursive=False):
-        self.positions[sta.contract_name.string.lower() + '_' + sta.number.string] =\
+        self.positions[sta.contract_name.string.lower() + '_' + sta.number.string + '_' + 'full'] =\
           (sta.lat.string, sta.lng.string)
         # we use find('name') because .name is the current tag name
     return self.positions
@@ -206,16 +206,3 @@ def from_location(location):
     """return a list of source ids useful for location
     TODO : for the moment returns the whole config.sources"""
     return config.sources
-
-sp_ratp = None
-sp_jcdecaux_vls = None
-sp_transilien = None
-
-def gen_sources(ids):
-  global sp_ratp, sp_jcdecaux_vls, sp_transilien
-  sp_ratp = sp_ratp or SourceProvider_ratp()
-  sp_jcdecaux_vls = sp_jcdecaux_vls or SourceProvider_jcdecaux_vls()
-  sp_transilien = sp_transilien or SourceProvider_transilien()
-  return chain(sp_ratp.sources_of_ids(ids.get('ratp_trafic', [])),\
-      sp_transilien.sources_of_ids(ids.get('transilien', [])),\
-      sp_jcdecaux_vls.sources_of_ids(ids.get('jcdecaux_vls', [])))
