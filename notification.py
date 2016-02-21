@@ -18,6 +18,6 @@ def notify(message):
      elif method == 'sendmail':
         run(['mail', '-s', conf['sendmail']['object'], conf['sendmail']['to']], input=message.encode(), check=True)
      elif method == 'print':
-        print(message)
+        print("[NOTIFICATION] " + message)
      else:
         raise NotImplementedError('notification method = ' + method + ' not known !')
