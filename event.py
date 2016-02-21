@@ -11,10 +11,10 @@ class Event():
         self.location = location
         self.description = description
 
-    def affiche(self):
-        print('<Date>: ' + str(self.date))
-        print('<Location>: ' + self.location)
-        print('<Description>: ' + self.description)
+    def __str__(self):
+        return """<Date>: """ + str(self.date) + """
+<Location>: """ + self.location + """
+<Description>:  + """ + self.description
 
 
 class HeapEvent():
