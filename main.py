@@ -57,7 +57,7 @@ def main():
 
             # get useful ids of sources for this location
             ids_sources = source.from_location(event.location)
-            # flatten this dictionnary
+            # flatten this dictionary
             ids_sources_flat = [item for (key, sublist) in ids_sources.items() for item in sublist]
             # grab info from internet for these sources
             sources=source.gen_sources(ids_sources)

@@ -10,11 +10,11 @@ class Source:
 
 class SourceProvider:
   def dic_of_names(self):
-    """Returns a dictionnary mapping ids to name (for find.py)"""
+    """Returns a dictionary mapping ids to name (for find.py)"""
     return []
 
   def dic_of_positions(self):
-    """Returns a disctionnary mapping ids to position (for geocoding.py)"""
+    """Returns a dictionary mapping ids to position (for geocoding.py)"""
     return []
 
   def sources_of_ids(self, ids):
@@ -110,12 +110,14 @@ class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
 
 class SourceProvider_jcdecaux_vls(SourceProvider):
   def __init__(self):
-    self.names = None
+    self.names = {}
+    self.positions = None
 
   def dic_of_names(self, contract=None):
-    if not self.names:
-      print('Téléchargement de la liste des stations...')
-      if contract:
+    contract = contract or 'all'
+    if contract not in self.names:
+      print('Téléchargement de la liste des stations pour le contrat ' + contract + '...')
+      if contract != 'all':
         xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?contract=' + contract + '&apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
       else:
         xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
@@ -127,7 +129,15 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
     return self.names
 
   def dic_of_positions(self):
-    return {} # TODO
+    if not self.positions:
+      print('Téléchargement de la liste des stations...')
+      xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
+      self.positions = {}
+      for sta in xml.data.json.find_all("item", recursive=False):
+        self.positions[sta.contract_name.string.lower() + '_' + sta.number.string] =\
+          (sta.lat.string, sta.lng.string)
+        # we use find('name') because .name is the current tag name
+    return self.positions
 
   def sources_of_ids(self, ids):
     ids_set = set(map(lambda s : s.rsplit('_', 1)[0], ids))
