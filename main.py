@@ -19,20 +19,23 @@ def make_tz_aware(dt, tz='UTC', is_dst=None):
 
 def main():
     heap = HeapEvent()
-    heap.push(Event(datetime.now()+timedelta(minutes=30, seconds=10), "Villejuif", "descr Villejuif"))
-    heap.push(Event(datetime.now()+timedelta(minutes=30, seconds=3), "Cachan", "descr Cachan"))
-    heap.push(Event(datetime.now()+timedelta(minutes=30, seconds=12), "université paris 7", "descr p7"))
+    heap.push(Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "Villejuif", "descr Villejuif"))
+    heap.push(Event('manual_2', datetime.now()+timedelta(minutes=30, seconds=3), "Cachan", "descr Cachan"))
+    heap.push(Event('manual_3', datetime.now()+timedelta(minutes=30, seconds=12), "université paris 7", "descr p7"))
     gap = timedelta(minutes=30) # 30 minutes : time to check trafic before an event
-
-    list_event = get_events()
-    for event in list_event:
-        heap.push(event)
-
+    refresh = timedelta(seconds=30) # grab events every 30 secondes
     while True:
-        # TODO feed heap
+        # feed heap
+        ids = [e[1].id for e in heap.data]
+        for event in get_events():
+            # check if we already know it
+            if event.id not in ids:
+                print("Add event:")
+                print(str(event))
+                heap.push(event)
 
         # sleep the min between 1 minute and the next event - gap
-        next = timedelta(seconds=1) # TODO 1 minute
+        next = refresh
         if not heap.empty():
             next = min(next, heap.top().date-datetime.now()-gap)
         if next.total_seconds() > 0:
@@ -42,6 +45,7 @@ def main():
         # next event
         if not heap.empty() and heap.top().date-datetime.now() < gap:
             event = heap.pop()
+            print("Check event:")
             print(str(event))
 
             # get useful ids of sources for this location

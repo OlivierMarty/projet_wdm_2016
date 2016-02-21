@@ -2,17 +2,20 @@ import heapq
 
 class Event():
     """
+      id : str
       date : type datetime.datetime
       location : str
       description : str
     """
-    def __init__(self, date, location, description):
+    def __init__(self, id, date, location, description):
+        self.id = id
         self.date = date
         self.location = location
         self.description = description
 
     def __str__(self):
-        return """<Date>: """ + str(self.date) + """
+        return """<Id>: """ + str(self.id) + """
+<Date>: """ + str(self.date) + """
 <Location>: """ + self.location + """
 <Description>:  + """ + self.description
 
