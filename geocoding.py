@@ -27,5 +27,8 @@ def dist(posa, posb):
 def k_neighbors(positions, fro, n):
   """returns a list of (dist, id) of the n nearest points from fro
   positions is a dictionary id -> (lat, long)"""
-  distances = sorted([(dist(fro, pos), id) for (id, pos) in positions.items()])
-  return distances[:n]
+  distances = []
+  for (id, pos) in positions.items():
+    dmin = min(map(lambda p : dist(fro, p), pos))
+    distances.append((dmin, id))
+  return sorted(distances)[:n]

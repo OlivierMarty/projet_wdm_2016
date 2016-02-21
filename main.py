@@ -23,8 +23,8 @@ def gen_sources(sourceProviders, location):
     print("Unable to find a position for " + location)
   else:
     for sp in sourceProviders:
-      # keep 2 nearest sources, if distance < 5 km
-      ids = [id for (dist, id) in k_neighbors(sp.dic_of_positions(), position, 2) if dist < 5]
+      # keep 2 nearest sources, if distance < 2 km
+      ids = [id for (dist, id) in k_neighbors(sp.dic_of_positions(), position, 2) if dist < 2]
       print('Cherches les sources : ', ids)
       for source in sp.sources_of_ids(ids):
           yield source
@@ -63,7 +63,7 @@ def main():
             next = min(next, heap.top().date-datetime.now()-gap)
         if next.total_seconds() > 0:
             print()
-            print("Sleeping " + str(next))
+            print("Sleeping " + str(next) + "...")
             sleep(next.total_seconds())
 
         # next event

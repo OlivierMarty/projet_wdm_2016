@@ -2,6 +2,7 @@ from class_xml import XML
 import config
 import datetime
 from itertools import chain
+import csv
 
 # SOURCE CLASSES
 
@@ -14,7 +15,7 @@ class SourceProvider:
     return []
 
   def dic_of_positions(self):
-    """Returns a dictionary mapping ids to position (for geocoding.py)"""
+    """Returns a dictionary mapping ids to a list of positions (for geocoding.py)"""
     return []
 
   def sources_of_ids(self, ids):
@@ -47,7 +48,21 @@ class SourceProvider_ratp(SourceProvider):
     return self.names
 
   def dic_of_positions(self):
-    return {} # TODO API ratp
+    if not self.positions:
+      self.positions = {}
+      try:
+        with open("ratp.csv", "r") as stations:
+          for fields in csv.reader(stations, delimiter=',', quotechar='"'):
+            lines = filter(lambda l: 'bus' not in l, fields[3].split(':')) # filter out bus line
+            if lines:
+              for line in lines:
+                if line not in self.positions:
+                  self.positions[line] = []
+                self.positions[line].append((fields[1], fields[2]))
+      except FileNotFoundError as e:
+        print("[ERROR] ratp.csv not found\nDid you run 'python3 ratp_preprocessing.py > ratp.csv' ?")
+        raise e
+    return self.positions
 
   def sources_of_ids(self, ids):
     for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
@@ -135,7 +150,7 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
       self.positions = {}
       for sta in xml.data.json.find_all("item", recursive=False):
         self.positions[sta.contract_name.string.lower() + '_' + sta.number.string + '_' + 'full'] =\
-          (sta.lat.string, sta.lng.string)
+          [(sta.lat.string, sta.lng.string)]
         # we use find('name') because .name is the current tag name
     return self.positions
 
