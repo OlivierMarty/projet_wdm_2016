@@ -17,7 +17,7 @@ class Event():
         return """<Id>: """ + str(self.id) + """
 <Date>: """ + str(self.date) + """
 <Location>: """ + self.location + """
-<Description>:  + """ + self.description
+<Description>: """ + self.description
 
 
 class HeapEvent():

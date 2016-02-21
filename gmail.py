@@ -9,6 +9,7 @@ from oauth2client import client
 from oauth2client import tools
 from gmail_msg import *
 from event import *
+from datetime import datetime
 
 try:
     import argparse
@@ -52,12 +53,6 @@ def get_credentials():
     return credentials
 
 def get_list_event_gmail():
-    
-    """
-    Creates a Gmail API service object and outputs a list of messages which contain the keyword in the user's Gmail account.
-   
-    """
-    
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('gmail', 'v1', http=http)
@@ -70,51 +65,25 @@ def get_list_event_gmail():
         print('No labels found.')
         return list_event
 
-
-
-    keyword = input('Please enter a keyword to start searching the related messages in the mailbox(ctrl+c for quit) : ').lower()
-
-    for i in range(3):
-        print()
-        
-    #print('Labels:')
     for label in labels:
         if (label['name']=='INBOX'):
-            print(label['name'])        
-            list_msg = ListMessagesMatchingQuery(service,"me", query=keyword)
-            #list_msg = ListMessagesWithLabels(service, "me", label['id'])
-            #print(list_msg)
-            i = 0
+            list_msg = ListMessagesMatchingQuery(service,"me", query="Rendez-vous")
             for msg in list_msg:
-                i = i + 1
-                #print()
-                #print('Message #%d:'% i)
-                #print('----')
                 msg = GetMessage(service,"me",msg['id'])
-                headers = get_message_header(msg)
-                
-                withwho = withwhomail = subject = date = location = body = status = ""
-                for e in headers:
-                    if (e['name']=='From'):
-                        #print 'Receive from: %s' % e['value']
-                        withwhomail = e['value']
-                        
-                    if (e['name']=='Subject'):
-                        #print 'Subject: %s' % e['value']
-                        subject = e['value']
-
-
-                    if (e['name']=='Date'):
-                        #print 'Date: %s' % e['value']
-                        date = e['value']
-                                  
                 mime_msg = GetMimeMessage(service,"me",msg['id'])
-                body = get_message_body(mime_msg).decode()
-                list_event.append(Event(date,location,body))
+                body = get_message_body(mime_msg)
+                try:
+                    # Parse only messages in the format + not lenient (do not check keywords etc)
+                    # Rendez-vous
+                    # le 22/02/2016 11h00
+                    # à l'université Paris Diderot
+                    # pour le cours de WDM
+                    lines = body.replace('\r', '').split('\n')
+                    if len(lines) >= 4 and lines[0] == 'Rendez-vous':
+                        date = datetime.strptime(lines[1][3:], '%d/%m/%Y %Hh%M')
+                        location = lines[2][2:]
+                        description = lines[3]
+                        list_event.append(Event('gmail_'+msg['id'], date,location,description))
+                except Exception as e:
+                    raise e
     return list_event
-                #print('Body:')
-                #print('%s' % msg_body)
-                  
-                #print(GetMessage(service, "me", msg['id']))
-                #GetMimeMessage(service,"me",msg['id'])
-    #print()

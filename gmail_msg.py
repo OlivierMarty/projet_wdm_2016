@@ -87,26 +87,14 @@ def GetMessage(service, user_id, msg_id):
     """
     try:
         message = service.users().messages().get(userId=user_id, id=msg_id).execute()
-      
-            
+
+
         return message
     except errors.HttpError:
         print('An error occurred: %s' % error)
 
 def get_message_header(message):
-   
-    #print 'Message snippet: %s' % message['snippet']
-    headers = message['payload']['headers']
-
-    return headers
-
-    #for e in headers:
-     #   if (e['name']=='From'):
-      #      print 'Receive from: %s' % e['value']
-       # if (e['name']=='Subject'):
-        #    print 'Subject: %s' % e['value']
-        #if (e['name']=='Date'):
-         #   print 'Date: %s' % e['value']
+    return message['payload']['headers']
 
 
 def GetMimeMessage(service, user_id, msg_id):
@@ -128,9 +116,9 @@ def GetMimeMessage(service, user_id, msg_id):
         #print 'Message snippet: %s' % message['snippet']
 
         msg_str = base64.urlsafe_b64decode(message['raw'].encode('ASCII'))
-     
+
         mime_msg = email.message_from_string(msg_str.decode())
-      
+
         return mime_msg
     except errors.HttpError:
         print('An error occurred: %s' % error)
@@ -138,7 +126,6 @@ def GetMimeMessage(service, user_id, msg_id):
 
 def get_message_body(mime_msg):
     body = ""
-
     if mime_msg.is_multipart():
         for part in mime_msg.walk():
             ctype = part.get_content_type()
@@ -146,13 +133,11 @@ def get_message_body(mime_msg):
 
             # skip any text/plain (txt) attachments
             if ctype == 'text/plain' and 'attachment' not in cdispo:
-                body = part.get_payload(decode=True)  # decode
+                body = part.get_payload()
                 break
     # not multipart - i.e. plain text, no attachments, keeping fingers crossed
     else:
-        body = mime_msg.get_payload(decode=True)
+        body = mime_msg.get_payload()
 
     #print 'Message body: %s' % body
     return body
-
-    

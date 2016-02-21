@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from time import sleep
 import notification
 from geocoding import position_of_location, k_neighbors
-from analyse_event import *
+from gmail import get_list_event_gmail
+from gcal import get_list_event_gcal
 
 def make_tz_aware(dt, tz='UTC', is_dst=None):
     """Add timezone information to a datetime object, only if it is naive."""
@@ -24,8 +25,12 @@ def gen_sources(sourceProviders, location):
     for sp in sourceProviders:
       # keep 2 nearest sources, if distance < 5 km
       ids = [id for (dist, id) in k_neighbors(sp.dic_of_positions(), position, 2) if dist < 5]
+      print('Cherches les sources : ', ids)
       for source in sp.sources_of_ids(ids):
           yield source
+
+def get_events():
+    return get_list_event_gmail() + get_list_event_gcal()
 
 def main():
     sourceProviders = [SourceProvider_ratp(),
@@ -33,9 +38,9 @@ def main():
       SourceProvider_transilien()]
     event_seen = set()
     heap = HeapEvent()
-    manual = [Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "Villejuif", "descr Villejuif"),
-      Event('manual_2', datetime.now()+timedelta(minutes=30, seconds=3), "Cachan", "descr Cachan"),
-      Event('manual_3', datetime.now()+timedelta(minutes=30, seconds=12), "université paris 7", "descr p7")]
+    manual = [Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "22 rue Henri Barbusse Villejuif", "descr Villejuif"),
+      Event('manual_2', datetime.now()+timedelta(minutes=30, seconds=3), "68 rue Camille Desmoulins Cachan", "descr Cachan"),
+      Event('manual_3', datetime.now()+timedelta(minutes=30, seconds=12), "université Paris Diderot", "descr p7")]
     gap = timedelta(minutes=30) # 30 minutes : time to check trafic before an event
     refresh = timedelta(seconds=30) # grab events every 30 secondes
     while True:
