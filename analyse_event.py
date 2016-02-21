@@ -1,16 +1,12 @@
 from gmail import *
 from gcal import *
 
-def main():
+def get_events():
+    return get_list_event_gmail() + get_list_event_gcal()
 
-    mc = input('Please enter m(for gmail) or c (for google calendar) to start the events finder: ').lower()
-    if (mc == 'm'):
-        list_event = get_list_event_gmail()
-    else:
-        list_event = get_list_event_gcal()
-  
-    for event in list_event:
+def main():
+    for event in get_events():
         event.affiche()
-    
+
 if __name__ == '__main__':
     main()
