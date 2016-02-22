@@ -36,4 +36,4 @@ def k_neighbors(positions, fro, n):
     (dmin, pmin) = min(map(lambda p : (dist(fro, p), p), pos))
     distances.append((dmin, pmin, id))
   dmin = min([d for (d, __, __) in distances])
-  return list(set(sorted(distances)[:n]) | set(filter(lambda i: i[0] < 1.5*dmin, distances)))
+  return list(set(sorted(distances)[:n]) | set(filter(lambda i: i[0] <= dmin+0.1, distances)))

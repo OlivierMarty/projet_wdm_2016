@@ -95,6 +95,10 @@ Lorsqu'un un événement arrive à échéance (dans l'état actuel du code on v�
 demi-heure avant l'échéance), on cherche la localisation de l'événement, puis
 une liste d'identifiants de sources qui peuvent être utiles pour ce rendre à cet
 événement (lignes passant auprès du lieu, stations vélos proches).
+Pour cela elle trie les sources pas distance croissante, prend les deux meilleures
+ainsi que celles qui sont à une distance comparable (au plus 100 mètres de plus
+que la plus petite distance),
+puis ne garde que celles qui sont moins de $2$km.
 Le module source récolte alors les informations, et si un problème est soulevé
 par l'une des sources, une notification est envoyée.
 
@@ -123,6 +127,10 @@ n'était pas dans un format qui nous convenait, en plus de peser plus de 500Mo~!
 Ce fichier extrait de ces données la liste des stations et les lignes les
 traversant, le fichier final ne pesant que 500Ko.
 L'url ou l'on peut trouver les données brut est indiqué en
-commentaire.
+commentaire.\\\\
+
+
+\small{Note: Après l'oral nous avons changé la démo pour afficher une carte avec un marqueur par
+source.}
 
 \end{document}
