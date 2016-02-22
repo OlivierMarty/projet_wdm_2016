@@ -208,8 +208,31 @@ class SourceProvider_transilien(SourceProvider):
         self.names[id] = id.replace('-', ' ')
     return self.names
 
+  def id_of_name(self, name):
+    if name in ['A', 'B', 'C', 'D', 'E']:
+      return 'RER-' + name
+    if name[0] == 'T':
+      return 'Tram-' + name
+    return 'Train-' + name
+
   def dic_of_positions(self):
-    return {} # TODO
+    if not self.positions:
+      print('Téléchargement de la liste des stations transilien...')
+      xml = XML(url='https://ressources.data.sncf.com/api/records/1.0/search/?dataset=osm-mapping-idf&rows=1000&refine.railway=station', lang='json')
+      self.positions = {}
+      for sta in xml.data.json.records.find_all("item", recursive=False):
+        pos_fields = sta.geometry.coordinates.find_all('item')
+        pos = (pos_fields[1].string, pos_fields[0].string)
+        if sta.find('relation_line'):
+          lines = sta.find('relation_line').string.split(';')
+          for line in lines:
+            id = self.id_of_name(line)
+            if not id in self.positions:
+              self.positions[id] = []
+            self.positions[id].append(pos)
+        else:
+          print("Warning : no lines at " + sta.find('name').string)
+    return self.positions
 
   def sources_of_ids(self, ids_pos):
     xml = XML(url="http://www.transilien.com/info-trafic/temps-reel", lang="html").data
