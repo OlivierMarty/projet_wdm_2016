@@ -94,7 +94,7 @@ def get_list_event_gcal():
     service = discovery.build('calendar', 'v3', http=http)
 
     now = datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events...')
+    print('Getting the upcoming 10 events from Google Calendar...')
     eventsResult = service.events().list(
         calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
         orderBy='startTime').execute()

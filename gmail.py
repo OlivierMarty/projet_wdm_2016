@@ -57,6 +57,7 @@ def get_list_event_gmail():
     service = discovery.build('gmail', 'v1', http=http)
     results = service.users().labels().list(userId='me').execute()
     labels = results.get('labels', [])
+    print('Getting mails matching "Rendez-vous" from Gmail...')
 
 
     list_event = []
