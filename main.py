@@ -30,7 +30,9 @@ def gen_sources(sourceProviders, location):
           yield source
 
 def get_events():
-    return get_list_event_gmail() + get_list_event_gcal()
+    # événements test
+    manual = [Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "cinéma mk2 bibliothèque", "film !")]
+    return get_list_event_gmail() + get_list_event_gcal() + manual
 
 def main():
     sourceProviders = [SourceProvider_ratp(),
@@ -38,14 +40,11 @@ def main():
       SourceProvider_transilien()]
     event_seen = set()
     heap = HeapEvent()
-    manual = [Event('manual_1', datetime.now()+timedelta(minutes=30, seconds=10), "22 rue Henri Barbusse Villejuif", "descr Villejuif"),
-      Event('manual_2', datetime.now()+timedelta(minutes=30, seconds=3), "68 rue Camille Desmoulins Cachan", "descr Cachan"),
-      Event('manual_3', datetime.now()+timedelta(minutes=30, seconds=12), "université Paris Diderot", "descr p7")]
     gap = timedelta(minutes=30) # 30 minutes : time to check trafic before an event
     refresh = timedelta(seconds=30) # grab events every 30 secondes
     while True:
         # feed heap
-        for event in get_events() + manual:
+        for event in get_events():
             # check if we already know it
             if event.id not in event_seen:
                 event_seen.add(event.id)
