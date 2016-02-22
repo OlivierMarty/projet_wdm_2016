@@ -1,5 +1,6 @@
 beautifulsoup4
 geopy
+pytz
 # requires packages libxml2-dev libxslt1-dev:
 lxml
 dicttoxml
