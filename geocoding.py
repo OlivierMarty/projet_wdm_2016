@@ -25,10 +25,10 @@ def dist(posa, posb):
         return vincenty(posa, posb).km
 
 def k_neighbors(positions, fro, n):
-  """returns a list of (dist, id) of the n nearest points from fro
+  """returns a list of (dist, pos, id) of the n nearest points from fro
   positions is a dictionary id -> (lat, long)"""
   distances = []
   for (id, pos) in positions.items():
-    dmin = min(map(lambda p : dist(fro, p), pos))
-    distances.append((dmin, id))
+    (dmin, pmin) = min(map(lambda p : (dist(fro, p), p), pos))
+    distances.append((dmin, pmin, id))
   return sorted(distances)[:n]

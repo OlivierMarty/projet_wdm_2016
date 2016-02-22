@@ -18,17 +18,18 @@ class SourceProvider:
     """Returns a dictionary mapping ids to a list of positions (for geocoding.py)"""
     return []
 
-  def sources_of_ids(self, ids):
-    """Returns a generator of Source these ids"""
+  def sources_of_ids(self, ids_pos):
+    """Returns a generator of Source these ids (a dictionary id -> position (only for display))"""
     return []
 
 
 ############## RATP ##############
 
 class Source_ratp(Source):
-  def __init__(self, ident, status, message):
+  def __init__(self, ident, pos, status, message):
     self.source = 'ratp_trafic'
     self.id = ident
+    self.pos = pos
     self.status = status
     self.message = message
 
@@ -64,19 +65,20 @@ class SourceProvider_ratp(SourceProvider):
         raise e
     return self.positions
 
-  def sources_of_ids(self, ids):
+  def sources_of_ids(self, ids_pos):
     for tag in XML(url="http://www.ratp.fr/meteo/", lang="html").data.select('div.encadre_ligne'):
-      if tag['id'] in ids:
-        yield Source_ratp(tag['id'], tag.img['alt'],\
+      if tag['id'] in ids_pos:
+        yield Source_ratp(tag['id'], ids_pos[tag['id']], tag.img['alt'],\
           tag['id'].replace('_', ' ') + ' : ' + tag.select('span.perturb_message')[0].string)
 
 
 ############## JCDECAUX_VLS ##############
 
 class Source_jcdecaux_vls(Source):
-  def __init__(self, ident, nom, timestamp, status):
+  def __init__(self, ident, pos, nom, timestamp, status):
     self.source = 'jcdecaux_vls'
     self.id = ident
+    self.pos = pos
     self.status = status # TODO dans l'API pour 1 station il semble que c'est toujours OPEN :-(
     self.date = datetime.datetime.fromtimestamp(int(timestamp)/1000).strftime('à %Hh%M le %d/%m')
     if status != "OPEN":
@@ -88,8 +90,8 @@ class Source_jcdecaux_vls(Source):
     return self.status != "OPEN"
 
 class Source_jcdecaux_vls_full(Source_jcdecaux_vls):
-  def __init__(self, ident, nom, timestamp, places, status):
-    super(Source_jcdecaux_vls_full, self).__init__(ident, nom, timestamp, status)
+  def __init__(self, ident, pos, nom, timestamp, places, status):
+    super(Source_jcdecaux_vls_full, self).__init__(ident, pos, nom, timestamp, status)
     self.id += "_full"
     self.places = int(places)
     if not self.message:
@@ -106,8 +108,8 @@ class Source_jcdecaux_vls_full(Source_jcdecaux_vls):
 
 
 class Source_jcdecaux_vls_empty(Source_jcdecaux_vls):
-  def __init__(self, ident, nom, timestamp, bikes, status):
-    super(Source_jcdecaux_vls_empty, self).__init__(ident, nom, timestamp, status)
+  def __init__(self, ident, pos, nom, timestamp, bikes, status):
+    super(Source_jcdecaux_vls_empty, self).__init__(ident, pos, nom, timestamp, status)
     self.id += "_empty"
     self.bikes = int(bikes)
     if not self.message:
@@ -154,24 +156,27 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
         # we use find('name') because .name is the current tag name
     return self.positions
 
-  def sources_of_ids(self, ids):
-    ids_set = set(map(lambda s : s.rsplit('_', 1)[0], ids))
+  def sources_of_ids(self, ids_pos):
+    ids_set = set(map(lambda s : s[0].rsplit('_', 1)[0], ids_pos.items()))
     for station in ids_set:
       (contract, number) = list(station.split('_'))
       xml = XML(url="https://api.jcdecaux.com/vls/v1/stations/" + number + "?contract=" + contract + "&apiKey="+config.api_key['jcdecaux_vls'], lang="json")
       tag = xml.data.json
-      if contract + '_' + number + '_full' in ids:
-        yield Source_jcdecaux_vls_full(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
-      if contract + '_' + number + '_empty' in ids:
-        yield Source_jcdecaux_vls_empty(contract + '_' + number, tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
+      id = contract + '_' + number + '_full'
+      if id in ids_pos:
+        yield Source_jcdecaux_vls_full(contract + '_' + number, ids_pos[id], tag.find('name').string, tag.last_update.string, tag.available_bike_stands.string, tag.status.string)
+      id = contract + '_' + number + '_empty'
+      if id in ids_pos:
+        yield Source_jcdecaux_vls_empty(contract + '_' + number, ids_pos[id], tag.find('name').string, tag.last_update.string, tag.available_bikes.string, tag.status.string)
 
 
 ############## TRANSILIEN ##############
 
 class Source_transilien(Source):
-  def __init__(self, ident, message):
+  def __init__(self, ident, pos, message):
     self.source = 'transilien'
     self.id = ident
+    self.pos = pos
     self.message = message
 
   def problem(self):
@@ -196,12 +201,12 @@ class SourceProvider_transilien(SourceProvider):
   def dic_of_positions(self):
     return {} # TODO
 
-  def sources_of_ids(self, ids):
+  def sources_of_ids(self, ids_pos):
     xml = XML(url="http://www.transilien.com/info-trafic/temps-reel", lang="html").data
     container = xml.select('div.b_info_trafic')[0]
     for line in container.find_all('div', recursive=False):
       id = line.select('.picto-transport')[1].get_text()
-      if id in ids:
+      if id in ids_pos:
         message = ""
         for c in line.select_one('.title').children:
           if c.name: # a tag
@@ -212,4 +217,4 @@ class SourceProvider_transilien(SourceProvider):
         for det in line.select('.item-disruption'):
           message += det.get_text()
         message = " ".join(message.split()) # delete multiple spaces
-        yield Source_transilien(id, message)
+        yield Source_transilien(id, ids_pos[id], message)
