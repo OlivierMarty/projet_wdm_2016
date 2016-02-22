@@ -53,12 +53,12 @@ class SourceProvider_ratp(SourceProvider):
       try:
         with open("ratp.csv", "r") as stations:
           for fields in csv.reader(stations, delimiter=',', quotechar='"'):
-            lines = filter(lambda l: 'bus' not in l, fields[3].split(':')) # filter out bus line
+            lines = filter(lambda l: 'bus' not in l, fields[2].split(':')) # filter out bus line
             if lines:
               for line in lines:
                 if line not in self.positions:
                   self.positions[line] = []
-                self.positions[line].append((fields[1], fields[2]))
+                self.positions[line].append((fields[0], fields[1]))
       except FileNotFoundError as e:
         print("[ERROR] ratp.csv not found\nDid you run 'python3 ratp_preprocessing.py > ratp.csv' ?")
         raise e

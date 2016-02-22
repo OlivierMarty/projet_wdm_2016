@@ -3,13 +3,18 @@ import csv
 # sources des données : http://data.ratp.fr/explore/dataset/offre-transport-de-la-ratp-format-gtfs/
 
 def get_stops():
-  """Returns a dictionary stop_id -> (latitude, longitude)"""
+  """Returns a dictionary stop_id -> (latitude, longitude)
+  and a dictionary address -> list of stop_id"""
   res = {}
+  res_add = {}
   with open("ratp_data/stops.txt", "r") as stops:
     for fields in csv.reader(stops, delimiter=',', quotechar='"'):
       if fields[0] != 'stop_id':
         res[fields[0]] = (fields[4], fields[5])
-  return res
+        if not fields[3] in res_add:
+            res_add[fields[3]] = []
+        res_add[fields[3]].append(fields[0])
+  return (res, res_add)
 
 def get_stop_times():
   """Returns a dictionary stop_id -> set of trip_id"""
@@ -69,18 +74,21 @@ def name_to_id(name):
 
 
 
-# TODO les arrêts sont différenciés pour chaque ligne :-(
-# les regrouper par adresse (elles sont strictement identiques pour la même station)
+# Each line has its own stop_id :
+# we group by stop_id by address
 def preprocessing():
   """Print the list of stations in the format stop_id,lat,lon,line:...:line"""
   trips = get_trips()
   routes = get_routes()
   stop_times = get_stop_times()
-  stops = get_stops()
-  for (id, (lat, lon)) in stops.items():
+  (stops, stops_add) = get_stops()
+  for (address, ids) in stops_add.items():
     try:
-      lines = get_lines_of_stations(stop_times, trips, routes, id)
-      print(id + "," + lat + "," + lon + "," + ":".join(map(name_to_id, lines)))
+      lines = set()
+      for id in ids:
+        lines.add(*get_lines_of_stations(stop_times, trips, routes, id))
+      (lat, lon) = stops[ids[0]] # arbitrary element, they all should have the same position
+      print(lat + "," + lon + "," + ":".join(map(name_to_id, lines)))
     except KeyError:
       pass
 
