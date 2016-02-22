@@ -1,4 +1,4 @@
-\documentclass[a4paper, 12pt]{article}
+\documentclass[a4paper, 8pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[francais, english]{babel}
@@ -8,7 +8,7 @@
 \usepackage{hyperref}
 \sloppy
 
-\title{Rapport du projet de \emph{Web Data Management}}
+\title{\vspace{-2cm}Rapport du projet de \emph{Web Data Management}}
 \author{Shendan Jin \& Olivier Marty}
 \date\today
 
@@ -18,66 +18,63 @@
 
 \section{Présentation du projet}
 
-Le but de ce projet est d'utiliser différentes sources d'information sur
-internet qui concernent l'état de différents moyens de transport (lignes de
+Le but de ce projet est d'utiliser différentes sources d'informations sur
+internet qui concernent l'état d'un moyen de transport (lignes de
 métro, de train, stations vélo vide ou pleine, ou encore un bouchon sur
 l'autoroute (non implémenté)) afin de prévenir l'utilisateur lorsque celui-ci va
 les utiliser.
-Pour cela on se connecte à son agenda (Google Calendar), et on analyse ses mails
+
+Pour cela on se connecte à son agenda (Google Calendar), et on analyse ses emails
 (Gmail) pour prévoir ses déplacements, mais d'autres sources pourrait être
 ajoutées, de façon modulaire.
+Pour chaque événement, on géolocalise l'adresse avec l'API d'OpenStreetMap,
+puis on cherche les moyens de transport utile pour ce rendre à ces coordonnées~:
+lignes passant par une station proche, stations de vélos proches...
+En cas de problème sur l'un de ces moyens de transport, l'utilisateur est
+notifié par le medium de son choix (email, ou sms via l'API de free mobile).
 
-L'utilisateur est alors notifié par le medium de son choix (email, ou sms via
-l'API de free mobile).
-
-\section{Description technique}
+\section{Description globale}
 
 Le projet est divisé en trois principales composantes :
 
-\subsection{La classe event}
+\subsection{La classe Event}
 
 Cette classe représente un événement auquel l'utilisateur va se rendre.
-Elle présente trois attributs : date, location, et description.
+Elle présente quatre attributs : id, date, location, et description.
 Les instances sont produites à partir de deux sources : Google Calendar et
 Gmail.
 
-\subsection{La classe source}
+Les seuls mails aboutissant à la detection d'un événement sont ceux de la forme :\\
+"Rendez-vous\\
+le 22/02/2016 08h45\\
+à Université Paris Diderot\\
+pour le cours de WDM"
 
-Cette classe représente une information provenant
-d'internet et qui concerne l'état d'un moyen de transport.
+
+\subsection{La classe Source}
+
+Cette classe représente une information provenant d'internet et qui concerne
+l'état d'un moyen de transport.
 Chaque instance doit fournir la méthode problem() (renvoit true si le moyen de
 transport encontre un problème), et les attributs id (identifiant de la source)
 et message (descriptif du problème).
 
-Les instances sont produites par plusieurs fonctions qui vont chercher
-l'information idoine sur internet.
-Nous avons implémenté :
+Nous avons implémenté plusieurs sources~: l'état des lignes de la RATP, du
+Transilien, et le nombre de vélos et de places libres dans les stations de
+jcdecaux\_vls (vélos en libre service disponibles dans de nombreuses villes).
 
-\paragraph{ratp\_trafic} En scrappant l'url \url{http://ratp.fr/meteo/}, cette
-fonction est un générateur qui donne une source pour chaque ligne de la RATP.
-(par exemple \{id="ligne\_rer\_B", message=""\}). % TODO message
-Il est à noté que la ratp ne fournit aucune API publique.
+\paragraph{ratp\_trafic} Les données sont récupérées en scrappant l'url
+\url{http://ratp.fr/meteo/}.
+En effet la ratp ne fournit aucune API publique dynamique (l'API statique a
+cependant été utilisée pour obtenir la localisation des stations et les lignes
+les traversant).
 
-\paragraph{transilien} Idem, en scrappant l'url \url{http://www.transilien.com/info-trafic/temps-reel},
-cette fonction génère une liste de sources pour les lignes de la SNCF transilien
-(par exemple \{id="RER-C", message=""\}). % TODO message
+\paragraph{transilien} Les données sont récupérées en scrappant l'url \url{http://www.transilien.com/info-trafic/temps-reel}.
 La SNCF fournit une API pour chercher des itinéraires, ou avoir les prochains
 horaires, mais pas, à notre connaissance, pour avoir des informations de trafic.
 
-\paragraph{jcdecaux\_vls} Cette fonction se connecte à l'API de jcdecaux\_vls
-(les vélos libres services de jcdecaux, comme les Vélib', voir
-\url{https://developer.jcdecaux.com/#/opendata/vls}).
-Pour chaque station dont l'utilisateur est intéressé, elle génère deux sources :
-une qui déclenche un problème lorsque la station est presque vide, et l'autre
-lorsqu'elle est presque pleine (par exemple \{id="paris\_42707\_empty",
-message="Station vélo 42707 - okabe (le kremlin-bicetre) à 18h53 le 20/02 : plus
-que 2 places disponibles !"\} ou encore \{id="paris\_19001\_empty", message="Station
-vélo 19001 - ourcq crimee à 18h58 le 20/02 : plus qu'un vélo disponible !"\})
-
-\paragraph{} Le fichier find.py contient une aide pour trouver les identifiants
-utilisé en interne pour désigner une source.
-Il propose une recherche intéractive dans les listes téléchargées depuis les
-différentes API.
+\paragraph{jcdecaux\_vls} Les données sont récupérées via l'API de jcdecaux\_vls
+(voir \url{https://developer.jcdecaux.com/#/opendata/vls}).
 
 \paragraph{} L'analyse des fichiers HTML ou JSON téléchargés est effectuée à
 l'aide de la bibliothèque Python
@@ -94,12 +91,37 @@ Elle fonctionne à l'aide d'un tas qui contient des instances de la classe Event
 représentant les prochains événements dont le programme a connaissance.
 De temps en temps, elle appelle les générateurs d'événements (module event) pour
 vérifier si de nouveaux événements sont connus.
-Lorsqu'un un événement arrive à échéance (dans l'état actuel on vérifie une
-demi-heure avant l'échéance), la fonction source.from\_location génère une liste
-d'identifiants de sources qui devraient être utiles pour ce rendre à cet
-événement (lignes passant auprès du lieu, stations vélos proches). % TODO pas eencore implémenté comme ça
+Lorsqu'un un événement arrive à échéance (dans l'état actuel du code on vérifie une
+demi-heure avant l'échéance), on cherche la localisation de l'événement, puis
+une liste d'identifiants de sources qui peuvent être utiles pour ce rendre à cet
+événement (lignes passant auprès du lieu, stations vélos proches).
 Le module source récolte alors les informations, et si un problème est soulevé
 par l'une des sources, une notification est envoyée.
 
+
+\section{Fichiers python}
+
+Afin d'executer un programme, il faut lancer la commande
+\texttt{python3 fichier.py}.
+Il faudra peut-être installer les dépendances python :
+\texttt{pip3 install -r requirements.txt}
+
+\paragraph{main.py} C'est le programme principal. Lors du premier lancement,
+il demandera l'autorisation de se connecter aux API Google Calendar et Gmail.
+
+\paragraph{demo.py} Lance une démonstration qui ignore les événements mais donne les
+notifications à partir d'une adresse. Il faut souvent appuyer sur
+\texttt{<enter>}
+
+\paragraph{find.py} Ce fichier fournit une aide
+pour trouver les identifiants utilisé en interne pour désigner une source.
+Il propose une recherche intéractive dans les listes téléchargées depuis les
+différentes API.
+
+\paragraph{ratp\_preprocessing.py} Les données statiques fournies par la ratp
+n'était pas dans un format qui nous convenait.
+Ce fichier extrait de ces données la liste des stations et les lignes les
+traversant. L'url ou l'on peut trouver les données brut est indiqué en
+commentaire.
 
 \end{document}
