@@ -63,7 +63,7 @@ def name_to_id(name):
     return 'ligne_rer_' + name
   if name == 'T3': # spécial case
     return 'ligne_tram_T3a'
-  if name[0] == 'T':
+  if name[0] == 'T' and name[1] in map(str, range(0, 10)):
     return 'ligne_tram_' + name
   try:
     if int(name) < 20: # TODO je n'ai pas vu les métro 7bis et 3bis
