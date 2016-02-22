@@ -44,7 +44,7 @@ class SourceProvider_ratp(SourceProvider):
 
   def dic_of_names(self):
     if not self.names:
-      print('Téléchargement de la liste des lignes ratp...')
+      print('Téléchargement de la liste des lignes RATP...')
       xml = XML(url='http://www.ratp.fr/meteo/', lang='html')
       self.names = {tag['id']: tag['id'].replace('_', ' ') for tag in xml.data.select('.encadre_ligne')}
     return self.names
@@ -53,6 +53,7 @@ class SourceProvider_ratp(SourceProvider):
     if not self.positions:
       self.positions = {}
       try:
+        print('Chargement de la liste des stations RATP...')
         with open("ratp.csv", "r") as stations:
           for fields in csv.reader(stations, delimiter=',', quotechar='"'):
             lines = filter(lambda l: 'bus' not in l, fields[2].split(':')) # filter out bus line
@@ -136,7 +137,7 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
 
   def get_xml_all(self):
     if not self.xml_all:
-      print('Téléchargement de la liste des stations...')
+      print('Téléchargement de la liste des stations JCDecaux...')
       self.xml_all = XML(url='https://api.jcdecaux.com/vls/v1/stations?apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
     return self.xml_all
 
@@ -144,7 +145,7 @@ class SourceProvider_jcdecaux_vls(SourceProvider):
     contract = contract or 'all'
     if contract not in self.contracts:
       self.contracts.add(contract)
-      print('Téléchargement de la liste des stations pour le contrat ' + contract + '...')
+      print('Téléchargement de la liste des stations JCDecaux pour le contrat ' + contract + '...')
       if contract != 'all':
         xml = XML(url='https://api.jcdecaux.com/vls/v1/stations?contract=' + contract + '&apiKey=' + config.api_key['jcdecaux_vls'], lang='json')
       else:
@@ -217,7 +218,7 @@ class SourceProvider_transilien(SourceProvider):
 
   def dic_of_positions(self):
     if not self.positions:
-      print('Téléchargement de la liste des stations transilien...')
+      print('Téléchargement de la liste des stations Transilien...')
       xml = XML(url='https://ressources.data.sncf.com/api/records/1.0/search/?dataset=osm-mapping-idf&rows=1000&refine.railway=station', lang='json')
       self.positions = {}
       for sta in xml.data.json.records.find_all("item", recursive=False):

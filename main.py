@@ -25,7 +25,7 @@ def gen_sources(sourceProviders, location):
     for sp in sourceProviders:
       # keep 2 nearest sources (and distance equivalent), if distance < 2 km
       ids_pos = {id: pos for (dist, pos, id) in k_neighbors(sp.dic_of_positions(), position, 2) if dist < 2}
-      print('Cherche les sources : ', list(ids_pos.keys()))
+      print('Cherche les sources :', list(ids_pos.keys()))
       for source in sp.sources_of_ids(ids_pos):
           yield source
 

@@ -28,8 +28,7 @@ Pour cela on se connecte à son agenda (Google Calendar), et on analyse ses emai
 (Gmail) pour prévoir ses déplacements, mais d'autres sources pourrait être
 ajoutées, de façon modulaire.
 Pour chaque événement, on géolocalise l'adresse avec l'API d'OpenStreetMap,
-puis on cherche les moyens de transport utiles pour ce rendre à ces coordonnées~:
-lignes passant par une station proche, stations de vélos proches...
+puis on cherche les moyens de transport utiles pour se rendre à ces coordonnées.
 En cas de problème sur l'un de ces moyens de transport, l'utilisateur est
 notifié par le medium de son choix (email, ou sms via l'API de free mobile).
 
@@ -50,7 +49,7 @@ le 22/02/2016 08h45\\
 pour le cours de WDM"
 
 
-\subsection{Les sources de trafic}
+\subsection{Les sources d'état du trafic}
 
 Une information concernant l'état d'un moyen de transport est représenté par un
 objet contenant un identifiant unique, un message, et un attribut booléen qui
@@ -60,16 +59,19 @@ Les données proviennent de différentes sources :
 \begin{itemize}
   \item \textbf{État des lignes de la RATP} Les données sont récupérées en scrapant l'url
   \url{http://ratp.fr/meteo/}.
-  En effet la ratp ne fournit aucune API publique dynamique (l'API statique a
+  En effet la ratp ne fournit aucune API publique dynamique (l'API statique
+  \url{http://data.ratp.fr/explore/dataset/offre-transport-de-la-ratp-format-gtfs/}
+  a
   cependant été utilisée pour obtenir la localisation des stations et les lignes
   les traversant).
 
   \item \textbf{État des lignes Transilien} Les données sont récupérées en scrapant l'url \url{http://www.transilien.com/info-trafic/temps-reel}.
-  La SNCF fournit une API pour chercher des itinéraires, ou avoir les prochains
-  horaires, mais pas, à notre connaissance, pour avoir des informations de trafic.
+  L'API SNCF (\url{https://ressources.data.sncf.com/explore/dataset/osm-mapping-idf/})
+  est par contre utilisée pour determiner la postition des stations et les
+  lignes les traversant.
 
-  \item \textbf{Vélos en libre service jcdecaux} Les données sont récupérées via
-  l'API jcdecaux\_vls (voir \url{https://developer.jcdecaux.com/#/opendata/vls}).
+  \item \textbf{Vélos en libre service JCDecaux} Les données sont récupérées via
+  l'API vls de JCDecaux (voir \url{https://developer.jcdecaux.com/#/opendata/vls}).
 \end{itemize}
 
 \subsection{La boucle principale}
@@ -104,9 +106,15 @@ différentes API.
 
 \paragraph{ratp\_preprocessing.py} Les données statiques fournies par la ratp
 n'était pas dans un format qui nous convenait, en plus de peser plus de 500Mo~!
-Ce fichier extrait de ces données la liste des stations et les lignes les
-traversant, le fichier final ne pesant que 500Ko.
-L'url ou l'on peut trouver les données brut est indiqué en
-commentaire dans ce fichier.
+Ce fichier extrait de ces données la liste des stations, leurs localisations et
+les lignes les traversant.
+Le fichier final ne pèse que 500Ko.
+L'url où l'on peut trouver les données brut est indiqués en commentaire dans ce
+fichier.
+
+\paragraph{map.py} Génère un fichier cvs contenant la liste des identifiants
+associés à des coordonnées d'intérêt.
+Une visualisation de ces données est disponible à l'adresse
+\url{https://www.google.com/maps/d/edit?mid=z6ibLBE5MDrk.kudB9LIy9Cws&usp=sharing}
 
 \end{document}

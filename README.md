@@ -38,8 +38,9 @@ Pour lancer la démo :
 
 ### API utilisées
 
-RATP, jcdecaux_vls (Vélib', Vélo'V, Bicloo, etc) et Transilien (pas vraiment
-intégré car on ne connait pas (encore) la localisation des stations).
+RATP, jcdecaux_vls (Vélib', Vélo'V, Bicloo, etc) et Transilien.
+
+Une visualisation des stations connues est disponible : https://www.google.com/maps/d/edit?mid=z6ibLBE5MDrk.kudB9LIy9Cws&usp=sharing
 
 ## Note
 
