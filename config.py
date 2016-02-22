@@ -2,7 +2,8 @@
 # API KEYS
 
 api_key = {
-  'jcdecaux_vls' : ''
+  'jcdecaux_vls' : '',
+  'google_maps'  : ''
 }
 
 

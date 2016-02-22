@@ -8,30 +8,28 @@ import os
 def str_of_pos(pos):
   return '{lat: ' + str(pos[0]) + ', lng: ' + str(pos[1]) + '}'
 
+def escape(str):
+  return str.replace("'", "\\'")
+
 def str_of_marker(pos, description):
   return """
   marker = new google.maps.Marker({
     position: """ + str_of_pos(pos) + """,
     map: map,
-    title: '""" + description + """'
+    title: '""" + escape(description) + """'
   });
   var infowindow = new google.maps.InfoWindow({
-    content: '""" + description + """'
+    content: '""" + escape(description) + """'
   });
   infowindow.open(marker.get('map'), marker);"""
 
 
-def open_markers(center, markers):
-  # markers_str = map(lambda pos_name: '&markers=color:blue|label:' + pos_name[1] + '|' + str_of_pos(pos_name[0]) , markers)
-  # if input('Montrer la carte ? [Y/n] ') != 'n':
-  #   url = "http://maps.google.com/maps/api/staticmap?center" + str_of_pos(center) +\
-  #   '&zoom=14&size=512x512&maptype=roadmap' +\
-  #   '&markers=color:red|label:destination|' + str_of_pos(center) + ''.join(markers_str)
-  #   webbrowser.open_new(url)
+def open_markers(center, location, markers):
   if input('Montrer la carte ? [Y/n] ') != 'n':
     html = """<!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <style type="text/css">
       html, body { height: 100%; margin: 0; padding: 0; }
       #map { height: 100%; }
@@ -46,7 +44,7 @@ function initMap() {
     center: """ + str_of_pos(center) + """,
     zoom: 15
   });
-""" + str_of_marker(center, 'destination')
+""" + str_of_marker(center, 'Destination : ' + location)
     for (pos, name) in markers:
       html += str_of_marker(pos, name)
     html += """
@@ -58,7 +56,7 @@ function initMap() {
   </body>
 </html>"""
     (f, path) = tempfile.mkstemp(suffix=".html")
-    os.write(f, html.encode())
+    os.write(f, html.encode('utf-8'))
     os.close(f)
     webbrowser.open_new('file://' + path)
 
@@ -80,7 +78,6 @@ for m in message():
   if not position:
     print("Désolé, l'adresse n'est pas reconnue :-(")
   else:
-    #open_pos(position)
     markers = []
 
     for source in main.gen_sources(sourceProviders, location):
@@ -89,9 +86,9 @@ for m in message():
         else:
             print("Pas de problème : ", end='')
         notification.notify(source.message)
-        markers.append((source.pos, source.id))
+        markers.append((source.pos, source.name))
 
-    open_markers(position, markers)
+    open_markers(position, location, markers)
 
   # empty line
   print()
