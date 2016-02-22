@@ -4,9 +4,9 @@ import main
 import notification
 
 def open_pos(pos):
-  print(pos)
-  if input('Montrer la position + ' + str(pos) + ' ? [Y/n] ') != 'n':
-    webbrowser.open_new("https://www.google.fr/maps/search/" + str(pos))
+  pos_str = '(' + str(pos[0]) + ', ' + str(pos[1]) + ')'
+  if input('Montrer la position ' + pos_str + ' ? [Y/n] ') != 'n':
+    webbrowser.open_new("https://www.google.fr/maps/search/" + pos_str)
 
 def message():
   yield("Faisons un essai !\n")
@@ -29,6 +29,10 @@ for m in message():
     open_pos(position)
 
     for source in main.gen_sources(sourceProviders, location):
+        if source.problem():
+            print("Problème :")
+        else:
+            print("No problemo :")
         notification.notify(source.message)
         if "full" in source.id:
             pos = sourceProviders[1].dic_of_positions()[source.id][0]
