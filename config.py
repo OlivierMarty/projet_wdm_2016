@@ -1,17 +1,12 @@
 
+# API KEYS
 
 api_key = {
   'jcdecaux_vls' : ''
 }
 
 
-# SOURCES D'EVENEMENTS A SURVEILLER
-
-# sources = {
-#   'ratp_trafic' : ['ligne_rer_B', 'ligne_metro_7'],
-#   'transilien' : ['RER-B', 'RER-C', 'Train-U'],
-#   'jcdecaux_vls' : ['paris_42707_full', 'paris_42707_empty', 'paris_42703_empty', 'paris_19001_full', 'paris_8038_empty', 'nantes_62_full']
-# }
+# PARAMÈTRES DES SOURCES D'EVENEMENTS
 
 sources_params = {
   'jcdecaux_vls' : {
