@@ -25,10 +25,15 @@ def dist(posa, posb):
         return vincenty(posa, posb).km
 
 def k_neighbors(positions, fro, n):
-  """returns a list of (dist, pos, id) of the n nearest points from fro
+  """returns a list of (dist, pos, id) of the nearest points from fro
+  returns n points (if possible) and all points closer than 1.5 times the distance
+  with the closest point.
   positions is a dictionary id -> (lat, long)"""
+  if not positions:
+    return []
   distances = []
   for (id, pos) in positions.items():
     (dmin, pmin) = min(map(lambda p : (dist(fro, p), p), pos))
     distances.append((dmin, pmin, id))
-  return sorted(distances)[:n]
+  dmin = min([d for (d, __, __) in distances])
+  return list(set(sorted(distances)[:n]) | set(filter(lambda i: i[0] < 1.5*dmin, distances)))
