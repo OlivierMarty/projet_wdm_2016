@@ -63,13 +63,13 @@ Nous avons implémenté plusieurs sources~: l'état des lignes de la RATP, du
 Transilien, et le nombre de vélos et de places libres dans les stations de
 jcdecaux\_vls (vélos en libre service disponibles dans de nombreuses villes).
 
-\paragraph{ratp\_trafic} Les données sont récupérées en scrappant l'url
+\paragraph{ratp\_trafic} Les données sont récupérées en scrapant l'url
 \url{http://ratp.fr/meteo/}.
 En effet la ratp ne fournit aucune API publique dynamique (l'API statique a
 cependant été utilisée pour obtenir la localisation des stations et les lignes
 les traversant).
 
-\paragraph{transilien} Les données sont récupérées en scrappant l'url \url{http://www.transilien.com/info-trafic/temps-reel}.
+\paragraph{transilien} Les données sont récupérées en scrapant l'url \url{http://www.transilien.com/info-trafic/temps-reel}.
 La SNCF fournit une API pour chercher des itinéraires, ou avoir les prochains
 horaires, mais pas, à notre connaissance, pour avoir des informations de trafic.
 
@@ -119,9 +119,10 @@ Il propose une recherche interactive dans les listes téléchargées depuis les
 différentes API.
 
 \paragraph{ratp\_preprocessing.py} Les données statiques fournies par la ratp
-n'était pas dans un format qui nous convenait.
+n'était pas dans un format qui nous convenait, en plus de peser plus de 500Mo~!
 Ce fichier extrait de ces données la liste des stations et les lignes les
-traversant. L'url ou l'on peut trouver les données brut est indiqué en
+traversant, le fichier final ne pesant que 500Ko.
+L'url ou l'on peut trouver les données brut est indiqué en
 commentaire.
 
 \end{document}
