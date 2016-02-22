@@ -20,7 +20,7 @@ Pour la démo, il faut configurer une clef API Google Maps (https://developers.g
 
 La section notifications de ce fichier permet de configurer la façon dont les
 notifications sont envoyées :
- - sendmail : envoie un mail (nécessite que la commande `mail` foncitonne)
+ - sendmail : envoie un mail (nécessite que la commande `mail` fonctionne)
  - print : affiche dans la console
  - free : envoie un SMS vie l'API free (voir http://mobile.free.fr/)
 
@@ -30,7 +30,7 @@ Pour lancer le programme :
 
     python3 main.py
 
-Les accès à Google Calendar et Gmail sera demandé au premier lancement.
+Les accès à Google Calendar et Gmail seront demandés au premier lancement.
 
 Pour lancer la démo :
 
