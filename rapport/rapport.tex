@@ -1,7 +1,7 @@
 \documentclass[a4paper, 8pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[francais, english]{babel}
+\usepackage[francais]{babel}
 \usepackage[a4paper]{geometry}
 \geometry{hmargin=2.5cm,vmargin=1.5cm}
 \usepackage{amssymb, amsmath,amsfonts,amsthm,mathrsfs}
@@ -34,15 +34,15 @@ notifié par le medium de son choix (email, ou sms via l'API de free mobile).
 
 \section{Description globale}
 
-Le projet est divisé en trois principales composantes :
+Le projet est divisé en trois principales composantes~:
 
 \subsection{Les événements}
 
 Les événements auquel l'utilisateur va se rendre sont représentés par un objet
 contenant un identifiant unique, la date, l'addresse, et une description.
-Ces événements sont récupérés à partir de deux sources : Google Calendar et
+Ces événements sont récupérés à partir de deux sources~: Google Calendar et
 Gmail.
-Cependant les seuls mails aboutissant à la détection d'un événement sont ceux de la forme :\\
+Cependant les seuls mails aboutissant à la détection d'un événement sont ceux de la forme~:\\
 "Rendez-vous\\
 le 22/02/2016 08h45\\
 à Université Paris Diderot\\
@@ -53,21 +53,21 @@ pour le cours de WDM"
 
 Une information concernant l'état d'un moyen de transport est représenté par un
 objet contenant un identifiant unique, un message, et un attribut booléen qui
-determine si le moyen de transport présente un problème.
+détermine si le moyen de transport présente un problème.
 
-Les données proviennent de différentes sources :
+Les données proviennent de différentes sources~:
 \begin{itemize}
   \item \textbf{État des lignes de la RATP} Les données sont récupérées en scrapant l'url
   \url{http://ratp.fr/meteo/}.
-  En effet la ratp ne fournit aucune API publique dynamique (l'API statique
+  En effet la ratp ne fournit aucune API publique dynamique.
+  L'API statique
   \url{http://data.ratp.fr/explore/dataset/offre-transport-de-la-ratp-format-gtfs/}
-  a
-  cependant été utilisée pour obtenir la localisation des stations et les lignes
-  les traversant).
+  a cependant été utilisée pour obtenir la localisation des stations et les lignes
+  les traversant.
 
   \item \textbf{État des lignes Transilien} Les données sont récupérées en scrapant l'url \url{http://www.transilien.com/info-trafic/temps-reel}.
   L'API SNCF (\url{https://ressources.data.sncf.com/explore/dataset/osm-mapping-idf/})
-  est par contre utilisée pour determiner la postition des stations et les
+  est par contre utilisée pour déterminer la postition des stations et les
   lignes les traversant.
 
   \item \textbf{Vélos en libre service JCDecaux} Les données sont récupérées via
@@ -90,31 +90,33 @@ envoyée pour chaque problème soulevé.
 
 Afin d'éxecuter un programme, il faut lancer la commande
 \texttt{python3 fichier.py}.
-Il faudra peut-être installer les dépendances python :
+Il faudra peut-être installer les dépendances python~:
 \texttt{pip3 install -r requirements.txt}
 
 \paragraph{main.py} C'est le programme principal. Lors du premier lancement,
 il demandera l'autorisation de se connecter aux API Google Calendar et Gmail.
 
-\paragraph{demo.py} Lance une démonstration qui ignore les événements mais donne les
-notifications à partir d'une adresse.
+\paragraph{demo.py} Lance une démonstration qui ignore les événements mais lance
+les notifications à partir d'une adresse.
 
-\paragraph{find.py} Ce fichier fournit une aide
-pour trouver les identifiants utilisé en interne pour désigner une source.
+\paragraph{find.py} Fournit une aide pour trouver les identifiants utilisés en
+interne pour désigner une source.
 Il propose une recherche interactive dans les listes téléchargées depuis les
 différentes API.
 
 \paragraph{ratp\_preprocessing.py} Les données statiques fournies par la ratp
-n'était pas dans un format qui nous convenait, en plus de peser plus de 500Mo~!
+n'était pas dans un format qui nous convenait (pour utiliser des termes de SGBDR,
+il faut faire plusieurs jointures pour trouver les lignes qui passent par un
+arrêt !), en plus de peser plus de 500Mo~!
 Ce fichier extrait de ces données la liste des stations, leurs localisations et
-les lignes les traversant.
-Le fichier final ne pèse que 500Ko.
-L'url où l'on peut trouver les données brut est indiqués en commentaire dans ce
-fichier.
+les lignes les traversant, et le fichier final (\texttt{ratp.csv}) ne pèse alors
+plus que que 500Ko.
+Les données brutes sont disponibles à l'adresse
+\url{http://data.ratp.fr/explore/dataset/offre-transport-de-la-ratp-format-gtfs/}.
 
 \paragraph{map.py} Génère un fichier cvs contenant la liste des identifiants
-associés à des coordonnées d'intérêt.
-Une visualisation de ces données est disponible à l'adresse
+associés à des coordonnées d'intérêt, pour visualisation.
+Une carte présentant ces données est disponible à l'adresse
 \url{https://www.google.com/maps/d/edit?mid=z6ibLBE5MDrk.kudB9LIy9Cws&usp=sharing}
 
 \end{document}
