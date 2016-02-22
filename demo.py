@@ -30,9 +30,9 @@ for m in message():
 
     for source in main.gen_sources(sourceProviders, location):
         if source.problem():
-            print("Problème :")
+            print("Problème : ", end='')
         else:
-            print("No problemo :")
+            print("Pas de problème : ", end='')
         notification.notify(source.message)
         if "full" in source.id:
             pos = sourceProviders[1].dic_of_positions()[source.id][0]
